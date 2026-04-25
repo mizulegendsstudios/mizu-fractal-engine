@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mizu Esports - Deep Navigation</title>
+    <style>
+        :root {
+            --hex-gold: #c8aa6e;
+            --hex-blue: #0ac8b9;
+            --bg-dark: #010a13;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(200, 170, 110, 0.2);
+            --transition: 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        
+        body { 
+            background: var(--bg-dark); 
+            color: white; 
+            font-family: "Inter", sans-serif; 
+            overflow: hidden; 
+            perspective: 2000px;
+            height: 100vh;
+        }
+
+        /* --- SMART BREADCRUMBS --- */
+        .hud-nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 20px;
+            background: linear-gradient(to bottom, rgba(1, 10, 19, 0.95), transparent);
+            z-index: 1000;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            mask-image: linear-gradient(to right, black 85%, transparent 100%);
+        }
+        .hud-nav::-webkit-scrollbar { display: none; }
+        .crumb {
+            white-space: nowrap; font-size: 10px; letter-spacing: 2px;
+            color: var(--hex-gold); padding: 5px 10px;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px); cursor: pointer;
+        }
+
+        /* --- LAYOUT ADAPTATIVO --- */
+        #stage {
+            width: 100vw; height: 100vh;
+            display: flex; transform-style: preserve-3d;
+        }
+
+        @media (orientation: portrait) {
+            #stage { flex-direction: column; }
+            .node { flex: 1; height: 33.33vh; }
+            .node-detail { display: none; } /* Resumen en móvil */
+        }
+
+        @media (orientation: landscape) {
+            #stage { 
+                flex-direction: column; 
+                overflow-y: auto; 
+                scroll-snap-type: y mandatory;
+            }
+            .node { 
+                flex: 0 0 100vh; 
+                scroll-snap-align: start; 
+                padding: 60px;
+            }
+            .node-detail { display: block; margin-top: 20px; opacity: 0.7; font-size: 0.9rem; max-width: 600px; }
+        }
+
+        .node {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            position: relative; background: rgba(9, 20, 40, 0.4);
+            border-bottom: 1px solid rgba(200, 170, 110, 0.05);
+            transition: all var(--transition);
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .node:focus {
+            background: rgba(10, 200, 185, 0.08);
+            border: 1px solid var(--hex-blue);
+        }
+
+        /* --- CONTENIDO NUTRIDO --- */
+        .node-tag { 
+            font-size: 0.7rem; color: var(--hex-blue); 
+            text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px;
+        }
+
+        .node h2 { font-size: 2.5rem; text-transform: uppercase; letter-spacing: 6px; }
+
+        /* --- ANIMACIONES --- */
+        .zoom-forward { transform: translateZ(1200px); opacity: 0; filter: blur(15px); }
+        .spawn-in { animation: spawn var(--transition) forwards; }
+        @keyframes spawn {
+            0% { transform: scale(0.8) translateZ(-500px); opacity: 0; }
+            100% { transform: scale(1) translateZ(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="hud-nav" id="hud-nav"></nav>
+<div id="stage"></div>
+
+<script>
+    const AudioEngine = {
+        ctx: new (window.AudioContext || window.webkitAudioContext)(),
+        tic(freq = 800) {
+            if (this.ctx.state === 'suspended') this.ctx.resume();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.04);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + 0.05);
+        }
+    };
+
+    const db = {
+        'HOME': {
+            items: ['News', 'Wiki', 'Pro Teams'],
+            desc: 'Bienvenido al nexo de Mizu Esports. Explora las ramas fractales.'
+        },
+        'NEWS': {
+            items: ['Patch 14.8', 'Mizu Cup 2026', 'New Skins'],
+            desc: 'Crónicas del servidor. Análisis profundo de la meta y eventos globales.'
+        },
+        'PRO TEAMS': {
+            items: ['Mizu Legends', 'T1', 'Gen.G'],
+            desc: 'Las organizaciones más grandes del mundo en un solo lugar.'
+        },
+        'MIZU LEGENDS': {
+            items: ['History', 'Players', 'Stats'],
+            desc: 'Dominando la escena regional desde 2024.'
+        },
+        'PLAYERS': {
+            items: ['Ryu', 'Baido', 'Mizu', 'Dragon', 'General'],
+            desc: 'El roster oficial que busca la gloria internacional.'
+        }
+    };
+
+    let historyStack = ['HOME'];
+
+    // --- MANEJO DE RUTAS (URL) ---
+    function updateURL() {
+        const path = historyStack.join('/');
+        window.location.hash = path;
+    }
+
+    function loadFromURL() {
+        const hash = window.location.hash.replace('#/', '').replace('#', '');
+        if (hash) {
+            historyStack = hash.split('/');
+            render(historyStack[historyStack.length - 1], 'forward');
+        } else {
+            render('HOME');
+        }
+    }
+
+    function render(node, direction = 'forward') {
+        const stage = document.getElementById('stage');
+        const oldNodes = document.querySelectorAll('.node');
+        
+        oldNodes.forEach(n => n.classList.add('zoom-forward'));
+
+        setTimeout(() => {
+            stage.innerHTML = '';
+            const key = node.toUpperCase();
+            const data = db[key] || { items: [], desc: 'Perfil detallado y estadísticas de carrera.' };
+            const isTerminal = historyStack.length > 4;
+
+            if (isTerminal || data.items.length === 0) {
+                stage.innerHTML = `
+                <div class="node spawn-in" tabIndex="0">
+                    <div class="node-tag">End of Branch</div>
+                    <h2>${node}</h2>
+                    <div class="node-detail">Este es el perfil final. No hay más ramas internas.</div>
+                </div>`;
+            } else {
+                data.items.forEach((name, i) => {
+                    const div = document.createElement('div');
+                    div.className = `node spawn-in`;
+                    div.tabIndex = 0;
+                    div.innerHTML = `
+                        <div class="node-tag">${key}</div>
+                        <h2>${name}</h2>
+                        <div class="node-detail">${db[name.toUpperCase()]?.desc || 'Explora más detalles dentro de esta categoría.'}</div>
+                    `;
+                    
+                    div.onclick = () => {
+                        AudioEngine.tic(1200);
+                        historyStack.push(name);
+                        updateURL();
+                        render(name, 'forward');
+                    };
+
+                    div.onkeydown = (e) => {
+                        if (e.key === 'Enter') div.click();
+                        // Corrección de navegación (Flechas)
+                        if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            const next = div.nextElementSibling;
+                            if (next) next.focus();
+                        }
+                        if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            const prev = div.previousElementSibling;
+                            if (prev) prev.focus();
+                        }
+                    };
+                    stage.appendChild(div);
+                });
+            }
+            updateHUD();
+            const first = stage.querySelector('.node');
+            if(first) first.focus();
+        }, 300);
+    }
+
+    function updateHUD() {
+        const nav = document.getElementById('hud-nav');
+        nav.innerHTML = '';
+        historyStack.forEach((name, i) => {
+            const span = document.createElement('span');
+            span.className = 'crumb';
+            span.innerText = name;
+            span.onclick = () => {
+                if (i === historyStack.length - 1) return;
+                AudioEngine.tic(600);
+                historyStack = historyStack.slice(0, i + 1);
+                updateURL();
+                render(name, 'backward');
+            };
+            nav.appendChild(span);
+        });
+        nav.scrollLeft = nav.scrollWidth;
+    }
+
+    // --- CORRECCIÓN DE SALTO Y NAVEGACIÓN ---
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Backspace') {
+            if (historyStack.length > 1) {
+                AudioEngine.tic(600);
+                historyStack.pop();
+                updateURL();
+                render(historyStack[historyStack.length - 1], 'backward');
+            }
+        }
+    });
+
+    window.addEventListener('hashchange', loadFromURL);
+    window.onload = loadFromURL;
+</script>
+</body>
+</html>
