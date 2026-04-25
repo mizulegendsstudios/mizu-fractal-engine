@@ -37,116 +37,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mizu Fractal Engine - Illustrator Edition</title>
+    <title>Mizu Fractal Engine - Manual Interactivo</title>
     <style>
         /**
          * =============================================================================
-         * MIZU FRACTAL ENGINE - Estándar de Navegación Fractal para la Web e IA
-         * Copyright (C) 2026 Moises Núñez / Mizu Legends Studios
-         * Licencia: AGPLv3 | Edición: Illustrator Pastel
+         * MIZU FRACTAL ENGINE - Estándar de Navegación Fractal 
+         * Copyright (C) 2026 Moises Núñez / Mizu Legends Studios - Licencia AGPLv3
          * =============================================================================
          */
 
         :root {
-            /* Paleta Pastel Seco / Ilustración Premium */
-            --hex-gold: #d4b483;     /* Tiza Dorado */
-            --hex-blue: #a8dadc;     /* Azul Hielo Seco */
-            --bg-dark: #2b2d42;      /* Carbón Suave */
-            --bg-card: #edf2f4;      /* Papel Crema */
-            --text-main: #2b2d42;    /* Tinta Oscura */
-            --glass: rgba(255, 255, 255, 0.7);
-            --transition: 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+            /* Tema 1: Illustrator Pastel (Default) */
+            --hex-gold: #d4b483; --hex-blue: #a8dadc; --bg-dark: #2b2d42;
+            --bg-card: #edf2f4; --text-main: #2b2d42; --glass: rgba(255, 255, 255, 0.7);
+            --transition: 0.8s cubic-bezier(0.2, 1, 0.2, 1);
         }
+
+        /* Definición de Temas Cíclicos */
+        body.theme-2 { --hex-gold: #c8aa6e; --bg-dark: #010a13; --bg-card: #091428; --text-main: #f0e6d2; --glass: rgba(1, 10, 19, 0.8); } /* LoL Dark */
+        body.theme-3 { --hex-gold: #ff758c; --bg-dark: #2b0b3d; --bg-card: #f9f7f7; --text-main: #2b0b3d; --glass: rgba(255, 255, 255, 0.8); } /* Cyber Pastel */
+        body.theme-4 { --hex-gold: #4a4e69; --bg-dark: #22223b; --bg-card: #9a8c98; --text-main: #22223b; --glass: rgba(255, 255, 255, 0.5); } /* Industrial */
+        body.theme-5 { --hex-gold: #2d6a4f; --bg-dark: #081c15; --bg-card: #d8f3dc; --text-main: #081c15; --glass: rgba(216, 243, 220, 0.8); } /* Forest Nature */
 
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        
-        body { 
-            background: var(--bg-dark); 
-            color: var(--text-main); 
-            font-family: "Inter", "Beaufort for LOL", sans-serif; 
-            overflow: hidden; 
-            perspective: 2000px;
-            height: 100vh;
-        }
+        body { background: var(--bg-dark); color: var(--text-main); font-family: "Inter", sans-serif; overflow: hidden; perspective: 2000px; height: 100vh; transition: background 0.5s ease; }
 
-        /* --- HUD NAVBAR --- */
-        .hud-nav {
-            position: fixed;
-            top: 0; width: 100%;
-            padding: 20px;
-            z-index: 1000;
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            mask-image: linear-gradient(to right, black 85%, transparent 100%);
-        }
+        .hud-nav { position: fixed; top: 0; width: 100%; padding: 20px; z-index: 1000; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
         .hud-nav::-webkit-scrollbar { display: none; }
 
-        .crumb {
-            white-space: nowrap; font-size: 11px; letter-spacing: 2px;
-            color: var(--hex-gold); padding: 8px 15px;
-            background: var(--glass); border: 1px solid var(--hex-gold);
-            backdrop-filter: blur(10px); cursor: pointer;
-            text-transform: uppercase; border-radius: 4px;
+        .crumb { 
+            white-space: nowrap; font-size: 11px; letter-spacing: 2px; color: var(--hex-gold); 
+            padding: 8px 15px; background: var(--glass); border: 1px solid var(--hex-gold);
+            backdrop-filter: blur(10px); cursor: pointer; text-transform: uppercase; border-radius: 4px; 
+            transition: 0.3s; display: flex; align-items: center;
         }
 
-        /* --- STAGE & NODES --- */
-        #stage {
-            width: 100vw; height: 100vh;
-            display: flex; transform-style: preserve-3d;
-        }
+        #stage { width: 100vw; height: 100vh; display: flex; transform-style: preserve-3d; }
 
-        @media (orientation: portrait) {
-            #stage { flex-direction: column; }
-            .node { flex: 1; width: 100%; height: 33.33vh; }
-            .node-detail { display: none; }
-        }
-
+        /* Responsividad */
+        @media (orientation: portrait) { #stage { flex-direction: column; } .node { flex: 1; height: 33.33vh; } .node-detail { display: none; } }
         @media (orientation: landscape) {
-            #stage { 
-                flex-direction: column; 
-                overflow-y: auto; 
-                scroll-snap-type: y mandatory;
-            }
-            .node { 
-                flex: 0 0 100vh; 
-                scroll-snap-align: start; 
-                padding: 100px;
-            }
-            .node-detail { display: block; margin-top: 30px; opacity: 0.8; font-size: 1.1rem; max-width: 700px; line-height: 1.6; }
+            #stage { flex-direction: column; overflow-y: auto; scroll-snap-type: y mandatory; }
+            .node { flex: 0 0 100vh; scroll-snap-align: start; padding: 100px; }
+            .node-detail { display: block; margin-top: 30px; opacity: 0.8; font-size: 1.2rem; max-width: 800px; }
         }
 
-        .node {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            position: relative; background: var(--bg-card);
-            border-bottom: 2px solid rgba(0,0,0,0.05);
-            transition: all var(--transition);
-            cursor: pointer;
-            text-align: center;
+        .node { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            position: relative; background: var(--bg-card); border-bottom: 2px solid rgba(0,0,0,0.05);
+            transition: transform var(--transition), opacity var(--transition), filter var(--transition), background 0.3s;
+            cursor: pointer; text-align: center;
         }
 
-        .node:focus {
-            background: #fff;
-            border: 2px solid var(--hex-gold);
-            box-shadow: 0 0 30px rgba(212, 180, 131, 0.2);
-            z-index: 10;
-        }
+        .node:focus { background: #fff; border: 2px solid var(--hex-gold); box-shadow: 0 0 40px rgba(0,0,0,0.1); z-index: 10; }
+        .node h2 { font-size: 3.5rem; text-transform: uppercase; letter-spacing: 8px; color: inherit; }
 
-        .node-tag { 
-            font-size: 0.8rem; color: var(--hex-gold); 
-            text-transform: uppercase; letter-spacing: 4px; margin-bottom: 15px;
-        }
-
-        .node h2 { font-size: 3rem; text-transform: uppercase; letter-spacing: 8px; color: var(--bg-dark); }
-
-        /* --- ANIMATIONS --- */
-        .zoom-forward { transform: translateZ(1200px); opacity: 0; filter: blur(15px); }
-        .spawn-in { animation: spawn var(--transition) forwards; }
-        @keyframes spawn {
-            0% { transform: scale(0.9) translateZ(-500px); opacity: 0; }
-            100% { transform: scale(1) translateZ(0); opacity: 1; }
-        }
+        /* Animaciones Cinéticas */
+        .anim-forward { transform: translateZ(1500px); opacity: 0; filter: blur(20px); }
+        .anim-backward { transform: translateZ(-1000px) scale(0.8); opacity: 0; filter: blur(10px); }
+        .spawn { animation: spawnIn var(--transition) forwards; }
+        @keyframes spawnIn { 0% { transform: translateZ(-800px) scale(0.9); opacity: 0; } 100% { transform: translateZ(0) scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -164,7 +114,7 @@
             osc.type = 'square';
             osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
             gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.05);
             osc.connect(gain); gain.connect(this.ctx.destination);
             osc.start(); osc.stop(this.ctx.currentTime + 0.05);
         }
@@ -172,90 +122,76 @@
 
     let fractalData = {};
     let historyStack = ['HOME'];
+    let currentTheme = 1;
 
-    // Cargar datos desde JSON externo
     async function loadData() {
         try {
             const response = await fetch('data.json');
             fractalData = await response.json();
-            loadFromURL();
         } catch (e) {
-            console.error("Error cargando data.json. Usando datos de respaldo.");
-            fractalData = {"HOME": {"items": ["Error: JSON no encontrado"], "desc": "Revisa tu data.json"}};
-            render('HOME');
+            fractalData = {"HOME": {"items": ["Error: Carga data.json"], "desc": "Sube el archivo al repo."}};
         }
+        loadFromURL();
     }
 
-    function updateURL() {
-        window.location.hash = historyStack.join('/');
-    }
-
-    function loadFromURL() {
-        const hash = window.location.hash.replace('#/', '').replace('#', '');
-        if (hash) {
-            historyStack = hash.split('/');
-            render(historyStack[historyStack.length - 1], 'forward');
-        } else {
-            render('HOME');
-        }
+    function toggleTheme() {
+        currentTheme = currentTheme >= 5 ? 1 : currentTheme + 1;
+        document.body.className = currentTheme === 1 ? '' : `theme-${currentTheme}`;
+        AudioEngine.tic(1500);
     }
 
     function render(node, direction = 'forward') {
         const stage = document.getElementById('stage');
         const oldNodes = document.querySelectorAll('.node');
         
-        oldNodes.forEach(n => n.classList.add('zoom-forward'));
+        oldNodes.forEach(n => n.classList.add(direction === 'forward' ? 'anim-forward' : 'anim-backward'));
 
         setTimeout(() => {
             stage.innerHTML = '';
             const key = node.toUpperCase();
-            const data = fractalData[key] || { items: [], desc: 'Perfil detallado y terminal.' };
-            
-            // Calle sin salida: Nivel 5 o datos vacíos
+            const data = fractalData[key] || { items: [], desc: "Contenido terminal del manual." };
             const isTerminal = historyStack.length > 4 || data.items.length === 0;
 
             if (isTerminal) {
-                stage.innerHTML = `
-                <div class="node spawn-in" tabIndex="0">
-                    <div class="node-tag">Perfil Terminal</div>
-                    <h2>${node}</h2>
-                    <div class="node-detail">${data.desc}</div>
-                </div>`;
+                const div = createNode(node, "PUNTO FINAL", data.desc, true);
+                stage.appendChild(div);
             } else {
                 data.items.forEach((name, i) => {
-                    const div = document.createElement('div');
-                    div.className = `node spawn-in`;
-                    div.tabIndex = 0;
-                    div.innerHTML = `
-                        <div class="node-tag">${key}</div>
-                        <h2>${name}</h2>
-                        <div class="node-detail">${fractalData[name.toUpperCase()]?.desc || 'Haz clic o pulsa Enter para profundizar.'}</div>
-                    `;
-                    
-                    div.onclick = () => {
-                        AudioEngine.tic(1100);
-                        historyStack.push(name);
-                        updateURL();
-                        render(name, 'forward');
-                    };
-
-                    div.onkeydown = (e) => {
-                        if (e.key === 'Enter') { e.preventDefault(); div.click(); }
-                        if (e.key === 'ArrowDown') { e.preventDefault(); div.nextElementSibling?.focus(); }
-                        if (e.key === 'ArrowUp') { e.preventDefault(); div.previousElementSibling?.focus(); }
-                    };
-                    stage.appendChild(div);
+                    stage.appendChild(createNode(name, key, fractalData[name.toUpperCase()]?.desc || "Explora este módulo...", false));
                 });
             }
             updateHUD();
-            const first = stage.querySelector('.node');
-            if(first) first.focus();
-        }, 300);
+            stage.querySelector('.node')?.focus();
+        }, 400);
+    }
+
+    function createNode(name, tag, desc, terminal) {
+        const div = document.createElement('div');
+        div.className = `node spawn`;
+        div.tabIndex = 0;
+        div.innerHTML = `<div class="node-tag">${tag}</div><h2>${name}</h2><div class="node-detail">${desc}</div>`;
+        
+        const executeNav = () => {
+            if(terminal) return;
+            AudioEngine.tic(1200);
+            historyStack.push(name);
+            window.location.hash = historyStack.join('/');
+            render(name, 'forward');
+        };
+
+        div.onclick = executeNav;
+        div.onkeydown = (e) => {
+            if (e.key === 'Enter') executeNav();
+            if (e.key === 'ArrowDown') { e.preventDefault(); div.nextElementSibling?.focus(); }
+            if (e.key === 'ArrowUp') { e.preventDefault(); div.previousElementSibling?.focus(); }
+        };
+        return div;
     }
 
     function updateHUD() {
         const nav = document.getElementById('hud-nav');
         nav.innerHTML = '';
+        
         historyStack.forEach((name, i) => {
             const span = document.createElement('span');
             span.className = 'crumb';
@@ -264,22 +200,29 @@
                 if (i === historyStack.length - 1) return;
                 AudioEngine.tic(700);
                 historyStack = historyStack.slice(0, i + 1);
-                updateURL();
+                window.location.hash = historyStack.join('/');
                 render(name, 'backward');
             };
             nav.appendChild(span);
         });
 
-        // Botón Donación Profesional
+        // Botón Temas
+        const themeBtn = document.createElement('span');
+        themeBtn.className = 'crumb';
+        themeBtn.style.marginLeft = 'auto';
+        themeBtn.style.borderColor = 'var(--hex-blue)';
+        themeBtn.innerHTML = `🎨 TEMA ${currentTheme}`;
+        themeBtn.onclick = toggleTheme;
+        nav.appendChild(themeBtn);
+
+        // Botón Donación
         const donateBtn = document.createElement('a');
         donateBtn.className = 'crumb';
         donateBtn.href = "https://www.paypal.com/donate/?hosted_button_id=CE4XEUSEYHQXL";
         donateBtn.target = "_blank";
-        donateBtn.style.cssText = "border-color: #ff5f5f; color: #ff5f5f; font-weight: bold; margin-left: auto;";
+        donateBtn.style.color = "#ff5f5f";
         donateBtn.innerText = "☕ APOYAR";
         nav.appendChild(donateBtn);
-
-        nav.scrollLeft = nav.scrollWidth;
     }
 
     window.addEventListener('keydown', (e) => {
@@ -287,13 +230,20 @@
             if (historyStack.length > 1) {
                 AudioEngine.tic(600);
                 historyStack.pop();
-                updateURL();
+                window.location.hash = historyStack.join('/');
                 render(historyStack[historyStack.length - 1], 'backward');
             }
         }
     });
 
-    window.addEventListener('hashchange', loadFromURL);
+    function loadFromURL() {
+        const hash = window.location.hash.replace('#/', '').replace('#', '');
+        if (hash) {
+            historyStack = hash.split('/').map(s => decodeURIComponent(s));
+            render(historyStack[historyStack.length - 1], 'forward');
+        } else { render('HOME'); }
+    }
+
     loadData();
 </script>
 </body>
