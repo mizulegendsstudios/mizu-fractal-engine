@@ -18,7 +18,7 @@
  * junto con este programa. Si no, vea <https://www.gnu.org/licenses/>.
  *
  * -----------------------------------------------------------------------------
- * Módulo: engine.core.js (Versión 2.1.0)
+ * Módulo: engine.core.js (Versión 2.3.0)
  * Rol: Interfaz de alta jerarquía, seguridad, accesibilidad y fluidez fractal.
  * Contrato de Interfaz:
  * • Jerarquía: Ramas dinámicas variables (1, 3, 5, n hijos o terminal).
@@ -28,7 +28,7 @@
  * • UX: Feedback auditivo sintetizado para confirmación de acciones.
  * -----------------------------------------------------------------------------
  * @author Moises Núñez (@mizulegends)
- * @version 2.2.0 - Edición "Illustrator Pastel"
+ * @version 2.3.0 - Edición "Illustrator Pastel"
  * =============================================================================
  */
 -->
@@ -57,7 +57,7 @@
     <meta name="twitter:site" content="@mizulegends">
     <meta name="twitter:creator" content="@mizulegends">
     
-    <title>Mizu Fractal Engine</title>
+    <title>Mizu Fractal Engine - Manual Interactivo</title>
     <style>
         /**
          * =============================================================================
@@ -131,7 +131,7 @@
             margin-bottom: 20px;
         }
 
-        /* Animaciones Cinéticas */
+        /* Animaciones Cinéticas Unificadas */
         .anim-forward { 
             transform: translateZ(1500px); 
             opacity: 0; 
@@ -258,17 +258,14 @@
         audioContextReady: false,
         
         init() {
-            // Solo inicializar si el contexto de audio está disponible
             if (typeof window.AudioContext !== 'undefined' || typeof window.webkitAudioContext !== 'undefined') {
                 this.ctx = new (window.AudioContext || window.webkitAudioContext)();
                 this.initialized = true;
             }
         },
         
-        // Método para iniciar audio después de gesto del usuario
         ensureAudioContext() {
             if (this.initialized && this.ctx && this.ctx.state === 'suspended') {
-                // Usar un gesto del usuario para iniciar
                 const startAudio = () => {
                     this.ctx.resume();
                     this.audioContextReady = true;
@@ -282,7 +279,6 @@
         },
         
         tic(freq = 800) {
-            // Asegurar que el contexto de audio esté listo
             if (!this.audioContextReady) {
                 this.ensureAudioContext();
                 return;
@@ -305,10 +301,10 @@
     let historyStack = ['HOME'];
     let currentTheme = 1;
     let cookiesAccepted = false;
+    let currentAnimationDirection = 'forward';
 
-    // Manejador de gestos del usuario para iniciar audio
+    // Inicialización
     document.addEventListener('DOMContentLoaded', () => {
-        // Inicializar audio después del primer gesto del usuario
         document.addEventListener('click', () => {
             AudioEngine.init();
             AudioEngine.ensureAudioContext();
@@ -327,7 +323,6 @@
 
     async function loadData() {
         try {
-            // Usar URL relativa simple para evitar errores de constructor URL
             const response = await fetch('data.json', {
                 credentials: 'same-origin',
                 headers: {
@@ -352,7 +347,7 @@
         AudioEngine.tic(1500);
     }
 
-    function render(node, direction = 'forward') {
+    function navigate(direction) {
         const stage = document.getElementById('stage');
         const oldNodes = document.querySelectorAll('.node');
         
@@ -363,12 +358,12 @@
 
         setTimeout(() => {
             stage.innerHTML = '';
-            const key = node.toUpperCase();
+            const key = historyStack[historyStack.length - 1].toUpperCase();
             const data = fractalData[key] || { items: [], desc: "Contenido terminal del manual." };
             const isTerminal = historyStack.length > 4 || data.items.length === 0;
 
             if (isTerminal) {
-                const div = createNode(node, "PUNTO FINAL", data.desc, true);
+                const div = createNode(historyStack[historyStack.length - 1], "PUNTO FINAL", data.desc, true);
                 stage.appendChild(div);
             } else {
                 data.items.forEach((name, i) => {
@@ -406,7 +401,8 @@
             AudioEngine.tic(1200);
             historyStack.push(name);
             window.location.hash = historyStack.join('/');
-            render(name, 'forward');
+            currentAnimationDirection = 'forward';
+            navigate('forward');
         };
 
         div.onclick = executeNav;
@@ -418,12 +414,20 @@
             if (e.key === 'ArrowDown') { 
                 e.preventDefault(); 
                 const next = div.nextElementSibling;
-                if (next && next.classList && next.classList.contains('node')) next.focus();
+                if (next && next.classList && next.classList.contains('node')) {
+                    next.focus();
+                    // Simular scroll para activar animación
+                    next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
             if (e.key === 'ArrowUp') { 
                 e.preventDefault(); 
                 const prev = div.previousElementSibling;
-                if (prev && prev.classList && prev.classList.contains('node')) prev.focus();
+                if (prev && prev.classList && prev.classList.contains('node')) {
+                    prev.focus();
+                    // Simular scroll para activar animación
+                    prev.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
             if (e.key === 'Tab') {
                 e.preventDefault();
@@ -432,6 +436,7 @@
                 const nextIndex = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
                 if (nextIndex >= 0 && nextIndex < focusable.length) {
                     focusable[nextIndex].focus();
+                    focusable[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
         };
@@ -453,7 +458,8 @@
                 AudioEngine.tic(700);
                 historyStack = historyStack.slice(0, i + 1);
                 window.location.hash = historyStack.join('/');
-                render(name, 'backward');
+                currentAnimationDirection = 'backward';
+                navigate('backward');
             };
             nav.appendChild(span);
         });
@@ -482,13 +488,40 @@
         nav.appendChild(donateBtn);
     }
 
+    // Manejo unificado de scroll
+    let scrollTimeout;
+    document.getElementById('stage').addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            const stage = document.getElementById('stage');
+            const scrollPosition = stage.scrollTop;
+            const nodeHeight = window.innerHeight;
+            const currentIndex = Math.round(scrollPosition / nodeHeight);
+            
+            // Encontrar el nodo actual y aplicar animación
+            const nodes = document.querySelectorAll('.node');
+            if (nodes[currentIndex]) {
+                nodes[currentIndex].focus();
+                
+                // Determinar dirección del scroll para animación
+                const previousIndex = historyStack.length - 2;
+                if (currentIndex > previousIndex) {
+                    currentAnimationDirection = 'forward';
+                } else {
+                    currentAnimationDirection = 'backward';
+                }
+            }
+        }, 100);
+    });
+
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' || e.key === 'Backspace') {
             if (historyStack.length > 1) {
                 AudioEngine.tic(600);
                 historyStack.pop();
                 window.location.hash = historyStack.join('/');
-                render(historyStack[historyStack.length - 1], 'backward');
+                currentAnimationDirection = 'backward';
+                navigate('backward');
             }
         }
     });
@@ -498,10 +531,18 @@
         if (hash) {
             historyStack = hash.split('/').map(s => decodeURIComponent(s));
             render(historyStack[historyStack.length - 1], 'forward');
-        } else { render('HOME'); }
+        } else { 
+            render('HOME', 'forward'); 
+        }
     }
 
-    // Funciones de Cookies con fallback para entornos sandbox
+    // Función render unificada
+    function render(node, direction = 'forward') {
+        currentAnimationDirection = direction;
+        navigate(direction);
+    }
+
+    // Funciones de Cookies con fallback
     function checkCookieConsent() {
         try {
             const consent = localStorage.getItem('cookieConsent');
@@ -511,7 +552,6 @@
                 cookiesAccepted = consent === 'accepted';
             }
         } catch (e) {
-            // Si localStorage no está disponible, asumir consentimiento por defecto
             console.warn('localStorage no disponible, usando fallback');
             cookiesAccepted = true;
         }
@@ -554,13 +594,6 @@
     function showPrivacyPolicy() {
         alert('Política de privacidad: Este sitio utiliza cookies para mejorar la experiencia del usuario. Los datos se procesan de acuerdo con las regulaciones de protección de datos.');
     }
-
-    // Mejora de accesibilidad: Manejo de foco
-    document.addEventListener('focus', (e) => {
-        if (e.target && e.target.classList && e.target.classList.contains('node')) {
-            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }, true);
 </script>
 </body>
 </html>
