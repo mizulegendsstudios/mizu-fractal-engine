@@ -28,7 +28,7 @@
  * • UX: Feedback auditivo sintetizado para confirmación de acciones.
  * -----------------------------------------------------------------------------
  * @author Moises Núñez (@mizulegends)
- * @version 2.1.0 - Edición "Hextech Glass"
+ * @version 2.1.0 - Edición "Illustrator Pastel"
  * =============================================================================
  */
 -->
@@ -37,14 +37,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mizu Esports - Deep Navigation</title>
+    <title>Mizu Fractal Engine - Illustrator Edition</title>
     <style>
+        /**
+         * =============================================================================
+         * MIZU FRACTAL ENGINE - Estándar de Navegación Fractal para la Web e IA
+         * Copyright (C) 2026 Moises Núñez / Mizu Legends Studios
+         * Licencia: AGPLv3 | Edición: Illustrator Pastel
+         * =============================================================================
+         */
+
         :root {
-            --hex-gold: #c8aa6e;
-            --hex-blue: #0ac8b9;
-            --bg-dark: #010a13;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(200, 170, 110, 0.2);
+            /* Paleta Pastel Seco / Ilustración Premium */
+            --hex-gold: #d4b483;     /* Tiza Dorado */
+            --hex-blue: #a8dadc;     /* Azul Hielo Seco */
+            --bg-dark: #2b2d42;      /* Carbón Suave */
+            --bg-card: #edf2f4;      /* Papel Crema */
+            --text-main: #2b2d42;    /* Tinta Oscura */
+            --glass: rgba(255, 255, 255, 0.7);
             --transition: 0.7s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
@@ -52,34 +62,35 @@
         
         body { 
             background: var(--bg-dark); 
-            color: white; 
-            font-family: "Inter", sans-serif; 
+            color: var(--text-main); 
+            font-family: "Inter", "Beaufort for LOL", sans-serif; 
             overflow: hidden; 
             perspective: 2000px;
             height: 100vh;
         }
 
-        /* --- SMART BREADCRUMBS --- */
+        /* --- HUD NAVBAR --- */
         .hud-nav {
             position: fixed;
             top: 0; width: 100%;
             padding: 20px;
-            background: linear-gradient(to bottom, rgba(1, 10, 19, 0.95), transparent);
             z-index: 1000;
             display: flex;
-            gap: 8px;
+            gap: 10px;
             overflow-x: auto;
             mask-image: linear-gradient(to right, black 85%, transparent 100%);
         }
         .hud-nav::-webkit-scrollbar { display: none; }
+
         .crumb {
-            white-space: nowrap; font-size: 10px; letter-spacing: 2px;
-            color: var(--hex-gold); padding: 5px 10px;
-            background: var(--glass); border: 1px solid var(--glass-border);
+            white-space: nowrap; font-size: 11px; letter-spacing: 2px;
+            color: var(--hex-gold); padding: 8px 15px;
+            background: var(--glass); border: 1px solid var(--hex-gold);
             backdrop-filter: blur(10px); cursor: pointer;
+            text-transform: uppercase; border-radius: 4px;
         }
 
-        /* --- LAYOUT ADAPTATIVO --- */
+        /* --- STAGE & NODES --- */
         #stage {
             width: 100vw; height: 100vh;
             display: flex; transform-style: preserve-3d;
@@ -87,8 +98,8 @@
 
         @media (orientation: portrait) {
             #stage { flex-direction: column; }
-            .node { flex: 1; height: 33.33vh; }
-            .node-detail { display: none; } /* Resumen en móvil */
+            .node { flex: 1; width: 100%; height: 33.33vh; }
+            .node-detail { display: none; }
         }
 
         @media (orientation: landscape) {
@@ -100,39 +111,40 @@
             .node { 
                 flex: 0 0 100vh; 
                 scroll-snap-align: start; 
-                padding: 60px;
+                padding: 100px;
             }
-            .node-detail { display: block; margin-top: 20px; opacity: 0.7; font-size: 0.9rem; max-width: 600px; }
+            .node-detail { display: block; margin-top: 30px; opacity: 0.8; font-size: 1.1rem; max-width: 700px; line-height: 1.6; }
         }
 
         .node {
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            position: relative; background: rgba(9, 20, 40, 0.4);
-            border-bottom: 1px solid rgba(200, 170, 110, 0.05);
+            position: relative; background: var(--bg-card);
+            border-bottom: 2px solid rgba(0,0,0,0.05);
             transition: all var(--transition);
             cursor: pointer;
             text-align: center;
         }
 
         .node:focus {
-            background: rgba(10, 200, 185, 0.08);
-            border: 1px solid var(--hex-blue);
+            background: #fff;
+            border: 2px solid var(--hex-gold);
+            box-shadow: 0 0 30px rgba(212, 180, 131, 0.2);
+            z-index: 10;
         }
 
-        /* --- CONTENIDO NUTRIDO --- */
         .node-tag { 
-            font-size: 0.7rem; color: var(--hex-blue); 
-            text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px;
+            font-size: 0.8rem; color: var(--hex-gold); 
+            text-transform: uppercase; letter-spacing: 4px; margin-bottom: 15px;
         }
 
-        .node h2 { font-size: 2.5rem; text-transform: uppercase; letter-spacing: 6px; }
+        .node h2 { font-size: 3rem; text-transform: uppercase; letter-spacing: 8px; color: var(--bg-dark); }
 
-        /* --- ANIMACIONES --- */
+        /* --- ANIMATIONS --- */
         .zoom-forward { transform: translateZ(1200px); opacity: 0; filter: blur(15px); }
         .spawn-in { animation: spawn var(--transition) forwards; }
         @keyframes spawn {
-            0% { transform: scale(0.8) translateZ(-500px); opacity: 0; }
+            0% { transform: scale(0.9) translateZ(-500px); opacity: 0; }
             100% { transform: scale(1) translateZ(0); opacity: 1; }
         }
     </style>
@@ -151,42 +163,31 @@
             const gain = this.ctx.createGain();
             osc.type = 'square';
             osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-            gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.04);
             osc.connect(gain); gain.connect(this.ctx.destination);
             osc.start(); osc.stop(this.ctx.currentTime + 0.05);
         }
     };
 
-    const db = {
-        'HOME': {
-            items: ['News', 'Wiki', 'Pro Teams'],
-            desc: 'Bienvenido al nexo de Mizu Esports. Explora las ramas fractales.'
-        },
-        'NEWS': {
-            items: ['Patch 14.8', 'Mizu Cup 2026', 'New Skins'],
-            desc: 'Crónicas del servidor. Análisis profundo de la meta y eventos globales.'
-        },
-        'PRO TEAMS': {
-            items: ['Mizu Legends', 'T1', 'Gen.G'],
-            desc: 'Las organizaciones más grandes del mundo en un solo lugar.'
-        },
-        'MIZU LEGENDS': {
-            items: ['History', 'Players', 'Stats'],
-            desc: 'Dominando la escena regional desde 2024.'
-        },
-        'PLAYERS': {
-            items: ['Ryu', 'Baido', 'Mizu', 'Dragon', 'General'],
-            desc: 'El roster oficial que busca la gloria internacional.'
-        }
-    };
-
+    let fractalData = {};
     let historyStack = ['HOME'];
 
-    // --- MANEJO DE RUTAS (URL) ---
+    // Cargar datos desde JSON externo
+    async function loadData() {
+        try {
+            const response = await fetch('data.json');
+            fractalData = await response.json();
+            loadFromURL();
+        } catch (e) {
+            console.error("Error cargando data.json. Usando datos de respaldo.");
+            fractalData = {"HOME": {"items": ["Error: JSON no encontrado"], "desc": "Revisa tu data.json"}};
+            render('HOME');
+        }
+    }
+
     function updateURL() {
-        const path = historyStack.join('/');
-        window.location.hash = path;
+        window.location.hash = historyStack.join('/');
     }
 
     function loadFromURL() {
@@ -208,15 +209,17 @@
         setTimeout(() => {
             stage.innerHTML = '';
             const key = node.toUpperCase();
-            const data = db[key] || { items: [], desc: 'Perfil detallado y estadísticas de carrera.' };
-            const isTerminal = historyStack.length > 4;
+            const data = fractalData[key] || { items: [], desc: 'Perfil detallado y terminal.' };
+            
+            // Calle sin salida: Nivel 5 o datos vacíos
+            const isTerminal = historyStack.length > 4 || data.items.length === 0;
 
-            if (isTerminal || data.items.length === 0) {
+            if (isTerminal) {
                 stage.innerHTML = `
                 <div class="node spawn-in" tabIndex="0">
-                    <div class="node-tag">End of Branch</div>
+                    <div class="node-tag">Perfil Terminal</div>
                     <h2>${node}</h2>
-                    <div class="node-detail">Este es el perfil final. No hay más ramas internas.</div>
+                    <div class="node-detail">${data.desc}</div>
                 </div>`;
             } else {
                 data.items.forEach((name, i) => {
@@ -226,29 +229,20 @@
                     div.innerHTML = `
                         <div class="node-tag">${key}</div>
                         <h2>${name}</h2>
-                        <div class="node-detail">${db[name.toUpperCase()]?.desc || 'Explora más detalles dentro de esta categoría.'}</div>
+                        <div class="node-detail">${fractalData[name.toUpperCase()]?.desc || 'Haz clic o pulsa Enter para profundizar.'}</div>
                     `;
                     
                     div.onclick = () => {
-                        AudioEngine.tic(1200);
+                        AudioEngine.tic(1100);
                         historyStack.push(name);
                         updateURL();
                         render(name, 'forward');
                     };
 
                     div.onkeydown = (e) => {
-                        if (e.key === 'Enter') div.click();
-                        // Corrección de navegación (Flechas)
-                        if (e.key === 'ArrowDown') {
-                            e.preventDefault();
-                            const next = div.nextElementSibling;
-                            if (next) next.focus();
-                        }
-                        if (e.key === 'ArrowUp') {
-                            e.preventDefault();
-                            const prev = div.previousElementSibling;
-                            if (prev) prev.focus();
-                        }
+                        if (e.key === 'Enter') { e.preventDefault(); div.click(); }
+                        if (e.key === 'ArrowDown') { e.preventDefault(); div.nextElementSibling?.focus(); }
+                        if (e.key === 'ArrowUp') { e.preventDefault(); div.previousElementSibling?.focus(); }
                     };
                     stage.appendChild(div);
                 });
@@ -268,17 +262,26 @@
             span.innerText = name;
             span.onclick = () => {
                 if (i === historyStack.length - 1) return;
-                AudioEngine.tic(600);
+                AudioEngine.tic(700);
                 historyStack = historyStack.slice(0, i + 1);
                 updateURL();
                 render(name, 'backward');
             };
             nav.appendChild(span);
         });
+
+        // Botón Donación Profesional
+        const donateBtn = document.createElement('a');
+        donateBtn.className = 'crumb';
+        donateBtn.href = "https://www.paypal.com/donate/?hosted_button_id=CE4XEUSEYHQXL";
+        donateBtn.target = "_blank";
+        donateBtn.style.cssText = "border-color: #ff5f5f; color: #ff5f5f; font-weight: bold; margin-left: auto;";
+        donateBtn.innerText = "☕ APOYAR";
+        nav.appendChild(donateBtn);
+
         nav.scrollLeft = nav.scrollWidth;
     }
 
-    // --- CORRECCIÓN DE SALTO Y NAVEGACIÓN ---
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' || e.key === 'Backspace') {
             if (historyStack.length > 1) {
@@ -291,7 +294,7 @@
     });
 
     window.addEventListener('hashchange', loadFromURL);
-    window.onload = loadFromURL;
+    loadData();
 </script>
 </body>
 </html>
