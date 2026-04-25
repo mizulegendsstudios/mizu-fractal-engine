@@ -1,0 +1,26 @@
+{
+  "HOME": {
+    "items": ["Wiki", "News", "Pro Teams"],
+    "desc": "El nexo fractal de Mizu Legends. Explora el conocimiento estructurado."
+  },
+  "WIKI": {
+    "items": ["Champions", "Items", "Map"],
+    "desc": "Enciclopedia detallada del juego. Todo sobre la meta actual."
+  },
+  "NEWS": {
+    "items": ["Patch 2.0", "New Season", "Events"],
+    "desc": "Crónicas y actualizaciones del servidor global."
+  },
+  "PRO TEAMS": {
+    "items": ["Mizu Legends", "T1", "G2 Esports"],
+    "desc": "Organizaciones profesionales de alto rendimiento."
+  },
+  "MIZU LEGENDS": {
+    "items": ["History", "Players", "Staff"],
+    "desc": "Dominio regional y excelencia táctica."
+  },
+  "PLAYERS": {
+    "items": ["Ryu", "Baido", "Mizu", "Dragon", "General"],
+    "desc": "Roster oficial. Cada jugador representa un pilar del equipo."
+  }
+}
