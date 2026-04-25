@@ -23,7 +23,7 @@ Este proyecto está bajo la licencia **GNU Affero General Public License v3**.
 
 ## 💰 Apoyo al Proyecto
 Este es un esfuerzo independiente para estandarizar la web fractal. Si este código te es útil, considera apoyar mi trabajo para mejorar la infraestructura y el dominio del proyecto:
-[Apoyar el Estándar (PayPal)](https://www.paypal.com/donate/?hosted_button_id=CE4XEUSEYHQXL)
+[![Apoyar el Estándar](https://img.shields.io/badge/Donar-PayPal-blue?style=for-the-badge&logo=paypal)](https://www.paypal.com/donate/?hosted_button_id=CE4XEUSEYHQXL)
 
 ---
 Desarrollado con visión táctica por **Mizu Legends**.
