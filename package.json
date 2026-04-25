@@ -1,0 +1,12 @@
+{
+  "name": "mizu-fractal-engine",
+  "version": "1.0.0",
+  "description": "Motor de navegación fractal optimizado para IA y SmartTV",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["fractal", "navigation", "esports", "smarttv", "ia"],
+  "author": "Moises Núñez",
+  "license": "AGPL-3.0"
+}
