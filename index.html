@@ -28,7 +28,7 @@
  * • UX: Feedback auditivo sintetizado para confirmación de acciones.
  * -----------------------------------------------------------------------------
  * @author Moises Núñez (@mizulegends)
- * @version 2.1.0 - Edición "Illustrator Pastel"
+ * @version 2.2.0 - Edición "Illustrator Pastel"
  * =============================================================================
  */
 -->
@@ -37,7 +37,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mizu Fractal Engine - Manual Interactivo</title>
+    <meta name="description" content="Mizu Fractal Engine - Estándar de Navegación Fractal para la Web e IA. Interfaz accesible, segura y fluida con transiciones cinéticas optimizadas.">
+    <meta name="keywords" content="fractal, navegación, accesibilidad, web, IA, Mizu Legends Studios, Moises Núñez">
+    <meta name="author" content="Moises Núñez">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#a8dadc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Mizu Fractal Engine">
+    <meta property="og:description" content="Interfaz de navegación fractal accesible y fluida para la web y IA">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mizu-fractal-engine.com">
+    <meta property="og:image" content="https://mizu-fractal-engine.com/preview.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@mizulegends">
+    <meta name="twitter:creator" content="@mizulegends">
+    
+    <title>Mizu Fractal Engine</title>
     <style>
         /**
          * =============================================================================
@@ -51,6 +71,7 @@
             --hex-gold: #d4b483; --hex-blue: #a8dadc; --bg-dark: #2b2d42;
             --bg-card: #edf2f4; --text-main: #2b2d42; --glass: rgba(255, 255, 255, 0.7);
             --transition: 0.8s cubic-bezier(0.2, 1, 0.2, 1);
+            --focus-ring: 2px solid var(--hex-gold);
         }
 
         /* Definición de Temas Cíclicos */
@@ -75,7 +96,11 @@
         #stage { width: 100vw; height: 100vh; display: flex; transform-style: preserve-3d; }
 
         /* Responsividad */
-        @media (orientation: portrait) { #stage { flex-direction: column; } .node { flex: 1; height: 33.33vh; } .node-detail { display: none; } }
+        @media (orientation: portrait) { 
+            #stage { flex-direction: column; } 
+            .node { flex: 1; height: 33.33vh; } 
+            .node-detail { display: none; } 
+        }
         @media (orientation: landscape) {
             #stage { flex-direction: column; overflow-y: auto; scroll-snap-type: y mandatory; }
             .node { flex: 0 0 100vh; scroll-snap-align: start; padding: 100px; }
@@ -87,28 +112,184 @@
             position: relative; background: var(--bg-card); border-bottom: 2px solid rgba(0,0,0,0.05);
             transition: transform var(--transition), opacity var(--transition), filter var(--transition), background 0.3s;
             cursor: pointer; text-align: center;
+            scroll-snap-align: start;
         }
 
-        .node:focus { background: #fff; border: 2px solid var(--hex-gold); box-shadow: 0 0 40px rgba(0,0,0,0.1); z-index: 10; }
-        .node h2 { font-size: 3.5rem; text-transform: uppercase; letter-spacing: 8px; color: inherit; }
+        .node:focus { 
+            background: #fff; 
+            border: 2px solid var(--hex-gold); 
+            box-shadow: 0 0 40px rgba(0,0,0,0.1); 
+            z-index: 10; 
+            outline: none;
+        }
+
+        .node h2 { 
+            font-size: 3.5rem; 
+            text-transform: uppercase; 
+            letter-spacing: 8px; 
+            color: inherit; 
+            margin-bottom: 20px;
+        }
 
         /* Animaciones Cinéticas */
-        .anim-forward { transform: translateZ(1500px); opacity: 0; filter: blur(20px); }
-        .anim-backward { transform: translateZ(-1000px) scale(0.8); opacity: 0; filter: blur(10px); }
-        .spawn { animation: spawnIn var(--transition) forwards; }
-        @keyframes spawnIn { 0% { transform: translateZ(-800px) scale(0.9); opacity: 0; } 100% { transform: translateZ(0) scale(1); opacity: 1; } }
+        .anim-forward { 
+            transform: translateZ(1500px); 
+            opacity: 0; 
+            filter: blur(20px); 
+            animation: forwardAnimation var(--transition) forwards;
+        }
+        
+        .anim-backward { 
+            transform: translateZ(-1000px) scale(0.8); 
+            opacity: 0; 
+            filter: blur(10px); 
+            animation: backwardAnimation var(--transition) forwards;
+        }
+
+        @keyframes forwardAnimation {
+            0% { transform: translateZ(-800px) scale(0.9); opacity: 0; }
+            100% { transform: translateZ(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes backwardAnimation {
+            0% { transform: translateZ(0) scale(1); opacity: 1; }
+            100% { transform: translateZ(1500px) scale(0.9); opacity: 0; }
+        }
+
+        /* Modal de Cookies */
+        .cookie-modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            padding: 20px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+
+        .cookie-modal.show {
+            transform: translateY(0);
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .cookie-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .cookie-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--hex-gold);
+            background: var(--glass);
+            color: var(--text-main);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .cookie-btn:hover {
+            background: var(--hex-gold);
+            color: white;
+        }
+
+        /* Accesibilidad */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Seguridad - Prevenir selecciones no deseadas */
+        .node, .crumb {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
     </style>
 </head>
 <body>
 
-<nav class="hud-nav" id="hud-nav"></nav>
-<div id="stage"></div>
+<!-- Modal de Cookies -->
+<div class="cookie-modal" id="cookieModal" role="dialog" aria-labelledby="cookieTitle" aria-describedby="cookieDescription">
+    <div class="cookie-content">
+        <div class="cookie-text">
+            <h3 id="cookieTitle">Política de Cookies</h3>
+            <p id="cookieDescription">Usamos cookies para mejorar tu experiencia. Al navegar, aceptas nuestro uso de cookies. <a href="#" onclick="showPrivacyPolicy(); return false;">Más información</a></p>
+        </div>
+        <div class="cookie-buttons">
+            <button class="cookie-btn" onclick="acceptCookies();">Aceptar</button>
+            <button class="cookie-btn" onclick="rejectCookies();">Rechazar</button>
+        </div>
+    </div>
+</div>
+
+<nav class="hud-nav" id="hud-nav" role="navigation" aria-label="Navegación principal"></nav>
+<div id="stage" role="main"></div>
 
 <script>
     const AudioEngine = {
-        ctx: new (window.AudioContext || window.webkitAudioContext)(),
+        ctx: null,
+        initialized: false,
+        audioContextReady: false,
+        
+        init() {
+            // Solo inicializar si el contexto de audio está disponible
+            if (typeof window.AudioContext !== 'undefined' || typeof window.webkitAudioContext !== 'undefined') {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.initialized = true;
+            }
+        },
+        
+        // Método para iniciar audio después de gesto del usuario
+        ensureAudioContext() {
+            if (this.initialized && this.ctx && this.ctx.state === 'suspended') {
+                // Usar un gesto del usuario para iniciar
+                const startAudio = () => {
+                    this.ctx.resume();
+                    this.audioContextReady = true;
+                    document.removeEventListener('click', startAudio);
+                    document.removeEventListener('keydown', startAudio);
+                };
+                
+                document.addEventListener('click', startAudio, { once: true });
+                document.addEventListener('keydown', startAudio, { once: true });
+            }
+        },
+        
         tic(freq = 800) {
-            if (this.ctx.state === 'suspended') this.ctx.resume();
+            // Asegurar que el contexto de audio esté listo
+            if (!this.audioContextReady) {
+                this.ensureAudioContext();
+                return;
+            }
+            
+            if (!this.initialized || !this.ctx) return;
+            
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = 'square';
@@ -123,12 +304,43 @@
     let fractalData = {};
     let historyStack = ['HOME'];
     let currentTheme = 1;
+    let cookiesAccepted = false;
+
+    // Manejador de gestos del usuario para iniciar audio
+    document.addEventListener('DOMContentLoaded', () => {
+        // Inicializar audio después del primer gesto del usuario
+        document.addEventListener('click', () => {
+            AudioEngine.init();
+            AudioEngine.ensureAudioContext();
+        }, { once: true });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                AudioEngine.init();
+                AudioEngine.ensureAudioContext();
+            }
+        }, { once: true });
+        
+        checkCookieConsent();
+        loadData();
+    });
 
     async function loadData() {
         try {
-            const response = await fetch('data.json');
+            // Usar URL relativa simple para evitar errores de constructor URL
+            const response = await fetch('data.json', {
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) throw new Error('Network response was not ok');
+            
             fractalData = await response.json();
         } catch (e) {
+            console.error('Error loading data:', e);
             fractalData = {"HOME": {"items": ["Error: Carga data.json"], "desc": "Sube el archivo al repo."}};
         }
         loadFromURL();
@@ -144,7 +356,10 @@
         const stage = document.getElementById('stage');
         const oldNodes = document.querySelectorAll('.node');
         
-        oldNodes.forEach(n => n.classList.add(direction === 'forward' ? 'anim-forward' : 'anim-backward'));
+        // Limpiar animaciones previas
+        oldNodes.forEach(n => {
+            n.classList.remove('anim-forward', 'anim-backward');
+        });
 
         setTimeout(() => {
             stage.innerHTML = '';
@@ -161,14 +376,29 @@
                 });
             }
             updateHUD();
-            stage.querySelector('.node')?.focus();
-        }, 400);
+            
+            // Asegurar foco en el primer elemento
+            const firstNode = stage.querySelector('.node');
+            if (firstNode) {
+                firstNode.focus();
+                firstNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+
+        // Aplicar animaciones
+        setTimeout(() => {
+            oldNodes.forEach(n => {
+                n.classList.add(direction === 'forward' ? 'anim-forward' : 'anim-backward');
+            });
+        }, 50);
     }
 
     function createNode(name, tag, desc, terminal) {
         const div = document.createElement('div');
-        div.className = `node spawn`;
+        div.className = 'node';
         div.tabIndex = 0;
+        div.setAttribute('role', 'button');
+        div.setAttribute('aria-label', `${name} - ${desc}`);
         div.innerHTML = `<div class="node-tag">${tag}</div><h2>${name}</h2><div class="node-detail">${desc}</div>`;
         
         const executeNav = () => {
@@ -181,9 +411,29 @@
 
         div.onclick = executeNav;
         div.onkeydown = (e) => {
-            if (e.key === 'Enter') executeNav();
-            if (e.key === 'ArrowDown') { e.preventDefault(); div.nextElementSibling?.focus(); }
-            if (e.key === 'ArrowUp') { e.preventDefault(); div.previousElementSibling?.focus(); }
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                executeNav();
+            }
+            if (e.key === 'ArrowDown') { 
+                e.preventDefault(); 
+                const next = div.nextElementSibling;
+                if (next && next.classList && next.classList.contains('node')) next.focus();
+            }
+            if (e.key === 'ArrowUp') { 
+                e.preventDefault(); 
+                const prev = div.previousElementSibling;
+                if (prev && prev.classList && prev.classList.contains('node')) prev.focus();
+            }
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const focusable = Array.from(document.querySelectorAll('.node'));
+                const currentIndex = focusable.indexOf(div);
+                const nextIndex = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
+                if (nextIndex >= 0 && nextIndex < focusable.length) {
+                    focusable[nextIndex].focus();
+                }
+            }
         };
         return div;
     }
@@ -196,6 +446,8 @@
             const span = document.createElement('span');
             span.className = 'crumb';
             span.innerText = name;
+            span.setAttribute('role', 'button');
+            span.setAttribute('aria-label', `Navegar a ${name}`);
             span.onclick = () => {
                 if (i === historyStack.length - 1) return;
                 AudioEngine.tic(700);
@@ -211,6 +463,8 @@
         themeBtn.className = 'crumb';
         themeBtn.style.marginLeft = 'auto';
         themeBtn.style.borderColor = 'var(--hex-blue)';
+        themeBtn.setAttribute('role', 'button');
+        themeBtn.setAttribute('aria-label', 'Cambiar tema');
         themeBtn.innerHTML = `🎨 TEMA ${currentTheme}`;
         themeBtn.onclick = toggleTheme;
         nav.appendChild(themeBtn);
@@ -220,7 +474,10 @@
         donateBtn.className = 'crumb';
         donateBtn.href = "https://www.paypal.com/donate/?hosted_button_id=CE4XEUSEYHQXL";
         donateBtn.target = "_blank";
+        donateBtn.rel = "noopener noreferrer";
         donateBtn.style.color = "#ff5f5f";
+        donateBtn.setAttribute('role', 'link');
+        donateBtn.setAttribute('aria-label', 'Apoyar el proyecto en PayPal');
         donateBtn.innerText = "☕ APOYAR";
         nav.appendChild(donateBtn);
     }
@@ -244,7 +501,66 @@
         } else { render('HOME'); }
     }
 
-    loadData();
+    // Funciones de Cookies con fallback para entornos sandbox
+    function checkCookieConsent() {
+        try {
+            const consent = localStorage.getItem('cookieConsent');
+            if (!consent) {
+                showCookieModal();
+            } else {
+                cookiesAccepted = consent === 'accepted';
+            }
+        } catch (e) {
+            // Si localStorage no está disponible, asumir consentimiento por defecto
+            console.warn('localStorage no disponible, usando fallback');
+            cookiesAccepted = true;
+        }
+    }
+
+    function showCookieModal() {
+        const modal = document.getElementById('cookieModal');
+        modal.classList.add('show');
+    }
+
+    function acceptCookies() {
+        try {
+            localStorage.setItem('cookieConsent', 'accepted');
+            cookiesAccepted = true;
+            hideCookieModal();
+        } catch (e) {
+            console.warn('No se pudo guardar preferencia de cookies:', e);
+            cookiesAccepted = true;
+            hideCookieModal();
+        }
+    }
+
+    function rejectCookies() {
+        try {
+            localStorage.setItem('cookieConsent', 'rejected');
+            cookiesAccepted = false;
+            hideCookieModal();
+        } catch (e) {
+            console.warn('No se pudo guardar preferencia de cookies:', e);
+            cookiesAccepted = false;
+            hideCookieModal();
+        }
+    }
+
+    function hideCookieModal() {
+        const modal = document.getElementById('cookieModal');
+        modal.classList.remove('show');
+    }
+
+    function showPrivacyPolicy() {
+        alert('Política de privacidad: Este sitio utiliza cookies para mejorar la experiencia del usuario. Los datos se procesan de acuerdo con las regulaciones de protección de datos.');
+    }
+
+    // Mejora de accesibilidad: Manejo de foco
+    document.addEventListener('focus', (e) => {
+        if (e.target && e.target.classList && e.target.classList.contains('node')) {
+            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, true);
 </script>
 </body>
 </html>
