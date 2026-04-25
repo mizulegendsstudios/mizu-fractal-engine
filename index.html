@@ -36,7 +36,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Mizu Engine · Navegación Total + Navbar Focus</title>
+    <title>Mizu Engine · Navegación Universal + Controles</title>
     <style>
         * {
             margin: 0;
@@ -104,7 +104,7 @@
             color: var(--text-light);
         }
 
-        /* Breadcrumbs (navbar) - ahora focusable */
+        /* Breadcrumbs (navbar) focusable */
         .hud-nav {
             position: fixed;
             top: 0;
@@ -251,7 +251,7 @@
             100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0);}
         }
 
-        /* Botones flotantes */
+        /* Botones flotantes (focusables) */
         .floating-buttons {
             position: fixed;
             bottom: 24px;
@@ -277,13 +277,20 @@
             gap: 8px;
             transition: 0.2s;
             font-family: monospace;
+            outline: none;
+        }
+        .float-btn:focus-visible {
+            outline: 3px solid var(--hex-blue);
+            transform: scale(1.05);
+            background: var(--hex-blue);
+            color: var(--bg-dark);
         }
         .float-btn:hover {
             background: var(--hex-blue);
             color: var(--bg-dark);
         }
 
-        /* Modal cookie / apoyo */
+        /* Modales */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -326,6 +333,14 @@
             gap: 12px;
             z-index: 2100;
         }
+        button {
+            background: transparent;
+            border: 1px solid var(--hex-blue);
+            padding: 6px 16px;
+            border-radius: 40px;
+            color: var(--hex-blue);
+            cursor: pointer;
+        }
     </style>
 </head>
 <body data-theme="esports">
@@ -334,8 +349,8 @@
 <div id="stage"></div>
 
 <div class="floating-buttons">
-    <div class="float-btn" id="themeBtn">🎨 Cambiar tema</div>
-    <div class="float-btn" id="supportBtn">❤️ Apoyar</div>
+    <div class="float-btn" id="themeBtn" tabindex="0">🎨 Cambiar tema</div>
+    <div class="float-btn" id="supportBtn" tabindex="0">❤️ Apoyar</div>
 </div>
 
 <div id="cookieBar" class="cookie-bar" style="display: none;">
@@ -377,11 +392,31 @@
         }
     };
 
-    // ========== BASE DE DATOS (patrones) ==========
+    // ========== BASE DE DATOS (rama inicial: Controles + patrones) ==========
     const db = {
         '🏠 INICIO': {
-            items: ['🔷 Ejemplo: 3 opciones', '🚫 Callejón sin salida', '🌀 Dispersión (6 opciones)', '🐙 Profundidad infinita', '📖 Ayuda / Guía'],
-            desc: 'Panel maestro. Navega con ↑↓ (entre nodos) o ↑ hacia el navbar. Con flechas izquierda/derecha en el navbar navegas entre migas.'
+            items: ['🎮 Controles / Ayuda', '🔷 Ejemplo: 3 opciones', '🚫 Callejón sin salida', '🌀 Dispersión (6 opciones)', '🐙 Profundidad infinita'],
+            desc: 'Centro de navegación universal. Usa ↑↓ para moverte entre opciones, ←→ en el navbar. Flecha arriba en el primer nodo lleva al navbar. Flecha abajo en el último nodo mueve a los botones flotantes.'
+        },
+        '🎮 Controles / Ayuda': {
+            items: ['⌨️ Teclado', '🎮 Mando (Gamepad)', '📺 Smart TV / Control Remoto', '🖱️ Ratón / Táctil'],
+            desc: 'Selecciona tu dispositivo para ver los comandos específicos y cómo navegar con fluidez.'
+        },
+        '⌨️ Teclado': {
+            items: [],
+            desc: '✅ Flechas ↑↓ : mover entre nodos (misma animación suave)\n✅ Enter : seleccionar / entrar en rama\n✅ ESC / Backspace : retroceder\n✅ Flechas ←→ : navegar entre migas (navbar)\n✅ Flecha arriba en primer nodo → foco al navbar\n✅ Flecha abajo en último nodo → foco a botones (Temas / Apoyar)'
+        },
+        '🎮 Mando (Gamepad)': {
+            items: [],
+            desc: '✅ D-pad arriba/abajo : navegar entre nodos\n✅ Botón A (Xbox) / Cruz (Play) / B (Nintendo) : Enter\n✅ Botón B / Atrás : ESC / retroceder\n✅ Gatillos izquierdo/derecho o D-pad izquierda/derecha : navegar por navbar\n✅ La misma fluidez y sonido que teclado.'
+        },
+        '📺 Smart TV / Control Remoto': {
+            items: [],
+            desc: '✅ Flechas direccionales del control remoto\n✅ Botón OK / Enter : seleccionar\n✅ Botón Volver / Exit : retroceder\n✅ Navegación entre nodos y navbar con flechas.\n✅ Experiencia adaptada a pantallas grandes con scroll suave.'
+        },
+        '🖱️ Ratón / Táctil': {
+            items: [],
+            desc: '✅ Scroll con rueda : desplazamiento suave entre nodos\n✅ Clic en cualquier nodo : seleccionar\n✅ Clic en migas de pan : retroceder a ese punto\n✅ Botones flotantes : clic para cambiar tema / apoyar\n✅ La animación es idéntica a la navegación por teclado.'
         },
         '🔷 Ejemplo: 3 opciones': { items: ['Opción Alpha', 'Opción Beta', 'Opción Gamma'], desc: 'Nodo con 3 ramas hijas.' },
         'Opción Alpha': { items: [], desc: 'Dead end.' },
@@ -393,25 +428,21 @@
         '🌀 Dispersión (6 opciones)': { items: ['Item #1','Item #2','Item #3','Item #4','Item #5','Item #6'], desc: 'Rama ancha con 6 opciones.' },
         'Item #1': { items: [], desc: 'Terminal' }, 'Item #2': { items: [], desc: 'Terminal' }, 'Item #3': { items: [], desc: 'Terminal' },
         'Item #4': { items: [], desc: 'Terminal' }, 'Item #5': { items: [], desc: 'Terminal' }, 'Item #6': { items: [], desc: 'Terminal' },
-        '🐙 Profundidad infinita': { items: ['Profundidad_N1'], desc: 'Profundidad infinita (haz clic para bajar)' },
-        '📖 Ayuda / Guía': { items: ['Navegación avanzada', 'Temas', 'Scroll vs Flechas'], desc: 'Tutorial' },
-        'Navegación avanzada': { items: [], desc: '↑↓ entre nodos. En el primero, ↑ va al navbar. ←→ en navbar navega entre migas. ↓ desde navbar vuelve al stage.' },
-        'Temas': { items: [], desc: 'Botón flotante cambia 5 temas. Se guarda.' },
-        'Scroll vs Flechas': { items: [], desc: 'Ambos usan scroll suave. La animación es idéntica.' }
+        '🐙 Profundidad infinita': { items: ['Profundidad_N1'], desc: 'Profundidad infinita (haz clic para bajar niveles)' }
     };
 
     function getDynamicDepth(itemName) {
         const match = itemName.match(/^Profundidad_N(\d+)$/);
         if (match) {
             const level = parseInt(match[1], 10);
-            return { items: [`Profundidad_N${level+1}`], desc: `🐙 Nivel ${level} — baja más.` };
+            return { items: [`Profundidad_N${level+1}`], desc: `🐙 Nivel ${level} — baja más. El breadcrumb soporta rutas largas.` };
         }
         return null;
     }
 
     let historyStack = ['🏠 INICIO'];
-    let currentStageFocusIndex = 0; // índice del nodo enfocado (opcional)
     let lastFocusedNode = null;
+    let focusOnButtons = false; // control para navegación desde nodo terminal
 
     function updateURL() { window.location.hash = historyStack.map(encodeURIComponent).join('/'); }
 
@@ -425,7 +456,7 @@
             const dynamic = getDynamicDepth(currentNode);
             if (dynamic) data = dynamic;
             else if (db[currentNode]) data = { items: db[currentNode].items, desc: db[currentNode].desc };
-            else data = { items: [], desc: `📌 Nodo terminal.` };
+            else data = { items: [], desc: `📌 Nodo terminal. Sin más opciones.` };
             const hasItems = data.items && data.items.length > 0;
             if (!hasItems) {
                 const leaf = document.createElement('div');
@@ -433,7 +464,7 @@
                 leaf.tabIndex = 0;
                 leaf.innerHTML = `<div class="node-tag">🏁 DEAD END</div><h2>${escapeHtml(currentNode)}</h2><div class="node-detail">${escapeHtml(data.desc)}</div>`;
                 stageEl.appendChild(leaf);
-                attachNodeEvents(leaf);
+                attachNodeEvents(leaf, true); // es hoja terminal
             } else {
                 data.items.forEach(childName => {
                     const div = document.createElement('div');
@@ -441,7 +472,7 @@
                     div.tabIndex = 0;
                     div.innerHTML = `<div class="node-tag">➡️ ${escapeHtml(currentNode)}</div><h2>${escapeHtml(childName)}</h2><div class="node-detail">${escapeHtml(getDynamicDesc(childName))}</div>`;
                     div.onclick = (e) => { e.stopPropagation(); navigateToChild(childName); };
-                    attachNodeEvents(div);
+                    attachNodeEvents(div, false);
                     stageEl.appendChild(div);
                 });
             }
@@ -462,15 +493,23 @@
         render(childName);
     }
 
-    function attachNodeEvents(node) {
+    function attachNodeEvents(node, isLeaf) {
         node.onkeydown = (e) => {
             if (e.key === 'Enter') { node.click(); return; }
             const nodes = Array.from(document.querySelectorAll('.node'));
             const idx = nodes.indexOf(node);
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                const next = nodes[idx + 1];
-                if (next) { next.focus(); next.scrollIntoView({ behavior: 'smooth', block: 'start' }); lastFocusedNode = next; }
+                if (idx === nodes.length - 1) {
+                    // Último nodo: mover foco a botones flotantes (Temas -> Apoyar)
+                    const themeBtn = document.getElementById('themeBtn');
+                    const supportBtn = document.getElementById('supportBtn');
+                    if (themeBtn) themeBtn.focus();
+                    return;
+                } else {
+                    const next = nodes[idx + 1];
+                    if (next) { next.focus(); next.scrollIntoView({ behavior: 'smooth', block: 'start' }); lastFocusedNode = next; }
+                }
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 if (idx === 0) {
@@ -483,25 +522,24 @@
                 }
             }
         };
-        // Almacenar referencia para posible retorno desde navbar
         node.addEventListener('focus', () => { lastFocusedNode = node; });
     }
 
     function getDynamicDesc(name) {
         if (db[name] && db[name].desc) return db[name].desc;
-        if (name.match(/^Profundidad_N\d+$/)) return `🐙 Profundidad dinámica.`;
+        if (name.match(/^Profundidad_N\d+$/)) return `🐙 Profundidad dinámica. Sigue bajando niveles.`;
         return `Explora "${name}".`;
     }
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
 
-    // NAVBAR (breadcrumbs) - ahora con navegación horizontal y foco
+    // NAVBAR con navegación horizontal y Enter
     function updateHUD() {
         const nav = document.getElementById('hud-nav');
         nav.innerHTML = '';
         historyStack.forEach((crumb, idx) => {
             const span = document.createElement('span');
             span.className = 'crumb';
-            span.tabIndex = 0; // focusable
+            span.tabIndex = 0;
             let display = crumb.length > 24 ? crumb.slice(0,20)+'…' : crumb;
             span.innerText = display;
             span.title = crumb;
@@ -512,24 +550,20 @@
                 updateURL();
                 render(historyStack[historyStack.length-1]);
             };
-            // navegación horizontal entre crumbs
             span.onkeydown = (e) => {
                 const crumbs = Array.from(document.querySelectorAll('.crumb'));
                 const currentIdx = crumbs.indexOf(span);
                 if (e.key === 'ArrowLeft') {
                     e.preventDefault();
                     if (currentIdx > 0) crumbs[currentIdx-1].focus();
-                    else if (currentIdx === 0) {
-                        // si es primero y flecha izquierda, ir al último? comportamiento opcional
-                        crumbs[crumbs.length-1].focus();
-                    }
+                    else crumbs[crumbs.length-1].focus();
                 } else if (e.key === 'ArrowRight') {
                     e.preventDefault();
                     if (currentIdx < crumbs.length-1) crumbs[currentIdx+1].focus();
-                    else if (currentIdx === crumbs.length-1) crumbs[0].focus();
+                    else crumbs[0].focus();
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
-                    // volver al stage: enfocar el último nodo conocido o el primero visible
+                    // volver al stage: último nodo conocido o primero
                     if (lastFocusedNode && document.body.contains(lastFocusedNode)) {
                         lastFocusedNode.focus();
                         lastFocusedNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -537,14 +571,59 @@
                         const firstNode = document.querySelector('.node');
                         if (firstNode) { firstNode.focus(); firstNode.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
                     }
-                } else if (e.key === 'ArrowUp') {
-                    // desde navbar, flecha arriba no tiene destino específico, pero la mantenemos para consistencia (podría quedarse)
+                } else if (e.key === 'Enter') {
                     e.preventDefault();
+                    span.click();  // misma acción que clic
                 }
             };
             nav.appendChild(span);
         });
         if (nav.lastChild) nav.lastChild.scrollIntoView({ behavior: 'smooth', inline: 'end' });
+    }
+
+    // ----- FOCUS EN BOTONES FLOTANTES (cíclico entre ellos y vuelta a stage) -----
+    function setupFloatingButtonsFocus() {
+        const themeBtn = document.getElementById('themeBtn');
+        const supportBtn = document.getElementById('supportBtn');
+        const buttons = [themeBtn, supportBtn];
+        
+        // Al salir del último botón con flecha abajo, volver al primer nodo del stage
+        supportBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const firstNode = document.querySelector('.node');
+                if (firstNode) {
+                    firstNode.focus();
+                    firstNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                themeBtn.focus();
+            }
+        });
+        themeBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                supportBtn.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                // Si está en el botón temas y flecha arriba, intentar volver al último nodo del stage
+                const nodes = document.querySelectorAll('.node');
+                if (nodes.length > 0) {
+                    nodes[nodes.length-1].focus();
+                    nodes[nodes.length-1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                themeBtn.click();
+            }
+        });
+        supportBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                supportBtn.click();
+            }
+        });
     }
 
     // Temas
@@ -558,10 +637,10 @@
         else applyTheme(0);
     }
 
-    // Modal y cookies
+    // Modales
     function showSupportModal() {
         const modal = document.getElementById('infoModal');
-        document.getElementById('modalText').innerHTML = '❤️ Gracias por apoyar. Este motor demuestra navegación total con foco, temas y patrones.';
+        document.getElementById('modalText').innerHTML = '❤️ Gracias por apoyar. Este motor demuestra navegación universal, fluidez total y compatibilidad con múltiples dispositivos.';
         modal.classList.add('active');
         AudioEngine.tic(700);
     }
@@ -574,7 +653,7 @@
         if(!localStorage.getItem('mizu_cookie_consent')) bar.style.display = 'flex';
         else bar.style.display = 'none';
         accept.onclick = () => { localStorage.setItem('mizu_cookie_consent','true'); bar.style.display = 'none'; AudioEngine.tic(420); };
-        more.onclick = () => { document.getElementById('modalText').innerHTML = '🍪 Cookies técnicas: tema y consentimiento.'; modal.classList.add('active'); AudioEngine.tic(680); };
+        more.onclick = () => { document.getElementById('modalText').innerHTML = '🍪 Cookies técnicas: tema y consentimiento. No se recogen datos personales.'; modal.classList.add('active'); AudioEngine.tic(680); };
         const hideModal = () => modal.classList.remove('active');
         closeModal.onclick = hideModal;
         modal.onclick = (e) => { if(e.target === modal) hideModal(); };
@@ -600,8 +679,8 @@
                 requestAnimationFrame(() => {
                     const nodes = document.querySelectorAll('.node');
                     if(!nodes.length) return;
-                    const viewMid = stage.scrollTop + stage.clientHeight/2;
                     let best = null, bestDist = Infinity;
+                    const viewMid = stage.scrollTop + stage.clientHeight/2;
                     nodes.forEach(node => {
                         const rect = node.getBoundingClientRect();
                         const mid = rect.top + rect.height/2;
@@ -636,6 +715,7 @@
         loadFromURL();
         initCookies();
         attachScrollFocusSync();
+        setupFloatingButtonsFocus();
         document.getElementById('themeBtn').addEventListener('click', cycleTheme);
         document.getElementById('supportBtn').addEventListener('click', showSupportModal);
         window.addEventListener('hashchange', loadFromURL);
