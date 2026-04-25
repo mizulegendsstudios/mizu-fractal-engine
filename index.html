@@ -30,8 +30,7 @@
  * @author Moises Núñez (@mizulegends)
  * @version 2.3.0 - Edición "Illustrator Pastel"
  * =============================================================================
- */
--->
+ -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -132,28 +131,38 @@
         }
 
         /* Animaciones Cinéticas Unificadas */
-        .anim-forward { 
-            transform: translateZ(1500px); 
-            opacity: 0; 
-            filter: blur(20px); 
-            animation: forwardAnimation var(--transition) forwards;
+        .anim-slide-in {
+            animation: slideIn var(--transition) forwards;
         }
         
-        .anim-backward { 
-            transform: translateZ(-1000px) scale(0.8); 
-            opacity: 0; 
-            filter: blur(10px); 
-            animation: backwardAnimation var(--transition) forwards;
+        .anim-slide-out {
+            animation: slideOut var(--transition) forwards;
         }
 
-        @keyframes forwardAnimation {
-            0% { transform: translateZ(-800px) scale(0.9); opacity: 0; }
-            100% { transform: translateZ(0) scale(1); opacity: 1; }
+        @keyframes slideIn {
+            0% { 
+                transform: translateZ(-800px) scale(0.9); 
+                opacity: 0; 
+                filter: blur(20px);
+            }
+            100% { 
+                transform: translateZ(0) scale(1); 
+                opacity: 1; 
+                filter: blur(0);
+            }
         }
 
-        @keyframes backwardAnimation {
-            0% { transform: translateZ(0) scale(1); opacity: 1; }
-            100% { transform: translateZ(1500px) scale(0.9); opacity: 0; }
+        @keyframes slideOut {
+            0% { 
+                transform: translateZ(0) scale(1); 
+                opacity: 1; 
+                filter: blur(0);
+            }
+            100% { 
+                transform: translateZ(1500px) scale(0.9); 
+                opacity: 0; 
+                filter: blur(20px);
+            }
         }
 
         /* Modal de Cookies */
@@ -297,11 +306,56 @@
         }
     };
 
-    let fractalData = {};
+    // Datos de ejemplo con una rama profunda y muchos elementos
+    let fractalData = {
+        "HOME": {
+            "items": ["Explorar", "Tutorial", "Demostración", "Profunda"],
+            "desc": "Bienvenido al Motor Fractal Mizu. Explora las opciones disponibles."
+        },
+        "EXPLORAR": {
+            "items": ["Navegación", "Animaciones", "Temas", "Accesibilidad"],
+            "desc": "Explora las características principales del motor fractal."
+        },
+        "TUTORIAL": {
+            "items": ["Introducción", "Conceptos", "Ejemplos", "Prácticas"],
+            "desc": "Aprende a usar el motor fractal paso a paso."
+        },
+        "DEMONSTRACIÓN": {
+            "items": ["Básico", "Intermedio", "Avanzado", "Profundo"],
+            "desc": "Visualiza las capacidades del motor en acción."
+        },
+        "PROFUNDA": {
+            "items": [
+                "Elemento 1", "Elemento 2", "Elemento 3", "Elemento 4", "Elemento 5",
+                "Elemento 6", "Elemento 7", "Elemento 8", "Elemento 9", "Elemento 10",
+                "Elemento 11", "Elemento 12", "Elemento 13", "Elemento 14", "Elemento 15",
+                "Elemento 16", "Elemento 17", "Elemento 18", "Elemento 19", "Elemento 20",
+                "Elemento 21", "Elemento 22", "Elemento 23", "Elemento 24", "Elemento 25"
+            ],
+            "desc": "Esta rama muestra cómo el menú se adapta cuando hay demasiados elementos para mostrar en el viewport. Desliza para ver todos los elementos disponibles."
+        },
+        "NAVEGACIÓN": {
+            "items": ["Scroll", "Teclas", "Mouse", "Touch"],
+            "desc": "Métodos de navegación disponibles en el motor fractal."
+        },
+        "ANIMACIONES": {
+            "items": ["Entrada", "Salida", "Transiciones", "Efectos"],
+            "desc": "Animaciones cinéticas y efectos visuales."
+        },
+        "TEMAS": {
+            "items": ["Pastel", "Oscuro", "Ciber", "Industrial", "Naturaleza"],
+            "desc": "Temas visuales disponibles para personalización."
+        },
+        "ACCESIBILIDAD": {
+            "items": ["Teclado", "Lectores de pantalla", "Contraste", "Tamaño"],
+            "desc": "Características de accesibilidad integradas."
+        }
+    };
+
     let historyStack = ['HOME'];
     let currentTheme = 1;
     let cookiesAccepted = false;
-    let currentAnimationDirection = 'forward';
+    let isAnimating = false;
 
     // Inicialización
     document.addEventListener('DOMContentLoaded', () => {
@@ -321,23 +375,8 @@
         loadData();
     });
 
-    async function loadData() {
-        try {
-            const response = await fetch('data.json', {
-                credentials: 'same-origin',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            fractalData = await response.json();
-        } catch (e) {
-            console.error('Error loading data:', e);
-            fractalData = {"HOME": {"items": ["Error: Carga data.json"], "desc": "Sube el archivo al repo."}};
-        }
+    function loadData() {
+        // Usamos los datos locales en lugar de fetch
         loadFromURL();
     }
 
@@ -348,12 +387,15 @@
     }
 
     function navigate(direction) {
+        if (isAnimating) return;
+        isAnimating = true;
+        
         const stage = document.getElementById('stage');
         const oldNodes = document.querySelectorAll('.node');
         
         // Limpiar animaciones previas
         oldNodes.forEach(n => {
-            n.classList.remove('anim-forward', 'anim-backward');
+            n.classList.remove('anim-slide-in', 'anim-slide-out');
         });
 
         setTimeout(() => {
@@ -383,8 +425,13 @@
         // Aplicar animaciones
         setTimeout(() => {
             oldNodes.forEach(n => {
-                n.classList.add(direction === 'forward' ? 'anim-forward' : 'anim-backward');
+                n.classList.add(direction === 'forward' ? 'anim-slide-out' : 'anim-slide-in');
             });
+            
+            // Reiniciar estado de animación después de la transición
+            setTimeout(() => {
+                isAnimating = false;
+            }, 800);
         }, 50);
     }
 
@@ -401,7 +448,6 @@
             AudioEngine.tic(1200);
             historyStack.push(name);
             window.location.hash = historyStack.join('/');
-            currentAnimationDirection = 'forward';
             navigate('forward');
         };
 
@@ -416,8 +462,8 @@
                 const next = div.nextElementSibling;
                 if (next && next.classList && next.classList.contains('node')) {
                     next.focus();
-                    // Simular scroll para activar animación
                     next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => navigate('forward'), 100);
                 }
             }
             if (e.key === 'ArrowUp') { 
@@ -425,8 +471,8 @@
                 const prev = div.previousElementSibling;
                 if (prev && prev.classList && prev.classList.contains('node')) {
                     prev.focus();
-                    // Simular scroll para activar animación
                     prev.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => navigate('backward'), 100);
                 }
             }
             if (e.key === 'Tab') {
@@ -437,6 +483,7 @@
                 if (nextIndex >= 0 && nextIndex < focusable.length) {
                     focusable[nextIndex].focus();
                     focusable[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => navigate(e.shiftKey ? 'backward' : 'forward'), 100);
                 }
             }
         };
@@ -458,7 +505,6 @@
                 AudioEngine.tic(700);
                 historyStack = historyStack.slice(0, i + 1);
                 window.location.hash = historyStack.join('/');
-                currentAnimationDirection = 'backward';
                 navigate('backward');
             };
             nav.appendChild(span);
@@ -488,7 +534,7 @@
         nav.appendChild(donateBtn);
     }
 
-    // Manejo unificado de scroll
+    // Manejo unificado de scroll con animación
     let scrollTimeout;
     document.getElementById('stage').addEventListener('scroll', () => {
         clearTimeout(scrollTimeout);
@@ -506,9 +552,9 @@
                 // Determinar dirección del scroll para animación
                 const previousIndex = historyStack.length - 2;
                 if (currentIndex > previousIndex) {
-                    currentAnimationDirection = 'forward';
+                    navigate('forward');
                 } else {
-                    currentAnimationDirection = 'backward';
+                    navigate('backward');
                 }
             }
         }, 100);
@@ -520,7 +566,6 @@
                 AudioEngine.tic(600);
                 historyStack.pop();
                 window.location.hash = historyStack.join('/');
-                currentAnimationDirection = 'backward';
                 navigate('backward');
             }
         }
@@ -530,16 +575,10 @@
         const hash = window.location.hash.replace('#/', '').replace('#', '');
         if (hash) {
             historyStack = hash.split('/').map(s => decodeURIComponent(s));
-            render(historyStack[historyStack.length - 1], 'forward');
+            navigate('forward');
         } else { 
-            render('HOME', 'forward'); 
+            navigate('forward'); 
         }
-    }
-
-    // Función render unificada
-    function render(node, direction = 'forward') {
-        currentAnimationDirection = direction;
-        navigate(direction);
     }
 
     // Funciones de Cookies con fallback
