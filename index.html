@@ -234,6 +234,7 @@
             border-radius: 40px;
             border: 0.5px solid var(--border-glow);
             margin-top: 14px;
+            white-space: pre-line;
         }
 
         /* animación suave */
@@ -290,7 +291,7 @@
             color: var(--bg-dark);
         }
 
-        /* Modales */
+        /* Modales con focus trap */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -313,8 +314,31 @@
             border: 1px solid var(--hex-gold);
             border-radius: 32px;
             max-width: 420px;
+            width: 85%;
             padding: 28px;
             text-align: center;
+        }
+        .modal-card button {
+            background: transparent;
+            border: 1px solid var(--hex-blue);
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: var(--hex-blue);
+            cursor: pointer;
+            margin-top: 16px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .modal-card button:focus-visible {
+            outline: 2px solid var(--hex-gold);
+            background: var(--hex-blue);
+            color: var(--bg-dark);
+        }
+        .modal-card .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
         .cookie-bar {
             position: fixed;
@@ -333,7 +357,7 @@
             gap: 12px;
             z-index: 2100;
         }
-        button {
+        .cookie-bar button {
             background: transparent;
             border: 1px solid var(--hex-blue);
             padding: 6px 16px;
@@ -354,18 +378,20 @@
 </div>
 
 <div id="cookieBar" class="cookie-bar" style="display: none;">
-    <p>🍪 Cookies técnicas (tema, preferencias). Sin datos personales.</p>
+    <p>🍪 Usamos cookies técnicas para recordar tu tema y preferencias. No almacenamos datos personales.</p>
     <div style="display: flex; gap: 10px;">
-        <button id="moreInfoBtn">ℹ️ Info</button>
+        <button id="moreInfoBtn">ℹ️ Más info</button>
         <button id="acceptCookiesBtn">Aceptar</button>
     </div>
 </div>
 
-<div id="infoModal" class="modal-overlay">
+<div id="infoModal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-card">
-        <h3 style="color: var(--hex-gold);">Información</h3>
+        <h3 style="color: var(--hex-gold); margin-bottom: 12px;">Información</h3>
         <p id="modalText"></p>
-        <button id="closeModalBtn">Entendido</button>
+        <div class="modal-buttons" id="modalButtons">
+            <button id="closeModalBtn">Entendido</button>
+        </div>
     </div>
 </div>
 
@@ -442,7 +468,6 @@
 
     let historyStack = ['🏠 INICIO'];
     let lastFocusedNode = null;
-    let focusOnButtons = false; // control para navegación desde nodo terminal
 
     function updateURL() { window.location.hash = historyStack.map(encodeURIComponent).join('/'); }
 
@@ -464,7 +489,7 @@
                 leaf.tabIndex = 0;
                 leaf.innerHTML = `<div class="node-tag">🏁 DEAD END</div><h2>${escapeHtml(currentNode)}</h2><div class="node-detail">${escapeHtml(data.desc)}</div>`;
                 stageEl.appendChild(leaf);
-                attachNodeEvents(leaf, true); // es hoja terminal
+                attachNodeEvents(leaf);
             } else {
                 data.items.forEach(childName => {
                     const div = document.createElement('div');
@@ -472,7 +497,7 @@
                     div.tabIndex = 0;
                     div.innerHTML = `<div class="node-tag">➡️ ${escapeHtml(currentNode)}</div><h2>${escapeHtml(childName)}</h2><div class="node-detail">${escapeHtml(getDynamicDesc(childName))}</div>`;
                     div.onclick = (e) => { e.stopPropagation(); navigateToChild(childName); };
-                    attachNodeEvents(div, false);
+                    attachNodeEvents(div);
                     stageEl.appendChild(div);
                 });
             }
@@ -493,7 +518,7 @@
         render(childName);
     }
 
-    function attachNodeEvents(node, isLeaf) {
+    function attachNodeEvents(node) {
         node.onkeydown = (e) => {
             if (e.key === 'Enter') { node.click(); return; }
             const nodes = Array.from(document.querySelectorAll('.node'));
@@ -501,9 +526,8 @@
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 if (idx === nodes.length - 1) {
-                    // Último nodo: mover foco a botones flotantes (Temas -> Apoyar)
+                    // Último nodo: mover foco a botones flotantes (Temas)
                     const themeBtn = document.getElementById('themeBtn');
-                    const supportBtn = document.getElementById('supportBtn');
                     if (themeBtn) themeBtn.focus();
                     return;
                 } else {
@@ -513,7 +537,6 @@
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 if (idx === 0) {
-                    // Primer nodo: saltar al navbar (primer crumb)
                     const firstCrumb = document.querySelector('.crumb');
                     if (firstCrumb) { firstCrumb.focus(); }
                 } else {
@@ -563,7 +586,6 @@
                     else crumbs[0].focus();
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
-                    // volver al stage: último nodo conocido o primero
                     if (lastFocusedNode && document.body.contains(lastFocusedNode)) {
                         lastFocusedNode.focus();
                         lastFocusedNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -573,7 +595,7 @@
                     }
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
-                    span.click();  // misma acción que clic
+                    span.click();
                 }
             };
             nav.appendChild(span);
@@ -581,13 +603,12 @@
         if (nav.lastChild) nav.lastChild.scrollIntoView({ behavior: 'smooth', inline: 'end' });
     }
 
-    // ----- FOCUS EN BOTONES FLOTANTES (cíclico entre ellos y vuelta a stage) -----
+    // ----- FOCUS EN BOTONES FLOTANTES (cíclico y regreso al stage) -----
     function setupFloatingButtonsFocus() {
         const themeBtn = document.getElementById('themeBtn');
         const supportBtn = document.getElementById('supportBtn');
         const buttons = [themeBtn, supportBtn];
         
-        // Al salir del último botón con flecha abajo, volver al primer nodo del stage
         supportBtn.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
@@ -599,6 +620,9 @@
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 themeBtn.focus();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                supportBtn.click();
             }
         });
         themeBtn.addEventListener('keydown', (e) => {
@@ -607,7 +631,6 @@
                 supportBtn.focus();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                // Si está en el botón temas y flecha arriba, intentar volver al último nodo del stage
                 const nodes = document.querySelectorAll('.node');
                 if (nodes.length > 0) {
                     nodes[nodes.length-1].focus();
@@ -618,12 +641,88 @@
                 themeBtn.click();
             }
         });
-        supportBtn.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                supportBtn.click();
+    }
+
+    // ----- MODAL FOCUS TRAP -----
+    let previousActiveElement = null;
+    function openModal(modalId, customContent = null) {
+        const modal = document.getElementById(modalId);
+        const modalText = document.getElementById('modalText');
+        if (customContent) modalText.innerHTML = customContent;
+        previousActiveElement = document.activeElement;
+        modal.classList.add('active');
+        // Enfocar el primer botón dentro del modal
+        const firstButton = modal.querySelector('button');
+        if (firstButton) firstButton.focus();
+        // Trap focus
+        const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const trap = (e) => {
+            if (e.key !== 'Tab') return;
+            if (e.shiftKey) {
+                if (document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            } else {
+                if (document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
             }
-        });
+        };
+        modal.addEventListener('keydown', trap);
+        modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeModal(modalId);
+            }
+        }, { once: false });
+        modal._trapHandler = trap;
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('active');
+        if (modal._trapHandler) {
+            modal.removeEventListener('keydown', modal._trapHandler);
+            delete modal._trapHandler;
+        }
+        if (previousActiveElement && previousActiveElement.focus) previousActiveElement.focus();
+    }
+
+    // ----- COOKIES Y MODALES -----
+    function initCookies() {
+        const bar = document.getElementById('cookieBar');
+        const acceptBtn = document.getElementById('acceptCookiesBtn');
+        const moreBtn = document.getElementById('moreInfoBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        if (!localStorage.getItem('mizu_cookie_consent')) {
+            bar.style.display = 'flex';
+        } else {
+            bar.style.display = 'none';
+        }
+        acceptBtn.onclick = () => {
+            localStorage.setItem('mizu_cookie_consent', 'true');
+            bar.style.display = 'none';
+            AudioEngine.tic(420);
+        };
+        moreBtn.onclick = () => {
+            openModal('infoModal', '🍪 Este sitio utiliza cookies técnicas para almacenar tu preferencia de tema y el consentimiento. No se recopilan datos personales ni se rastrea tu actividad. Puedes aceptar o rechazar (al rechazar, no se guardará tu tema).');
+        };
+        closeModalBtn.onclick = () => {
+            closeModal('infoModal');
+        };
+    }
+
+    // Botón apoyar: abre PayPal en nueva pestaña
+    function setupSupportButton() {
+        const supportBtn = document.getElementById('supportBtn');
+        supportBtn.onclick = () => {
+            AudioEngine.tic(900);
+            window.open('https://www.paypal.com/donate/?hosted_button_id=CE4XEUSEYHQXL', '_blank', 'noopener,noreferrer');
+        };
     }
 
     // Temas
@@ -635,29 +734,6 @@
         const saved = localStorage.getItem('mizu_theme');
         if(saved && themes.includes(saved)) { currentThemeIndex = themes.indexOf(saved); applyTheme(currentThemeIndex); }
         else applyTheme(0);
-    }
-
-    // Modales
-    function showSupportModal() {
-        const modal = document.getElementById('infoModal');
-        document.getElementById('modalText').innerHTML = '❤️ Gracias por apoyar. Este motor demuestra navegación universal, fluidez total y compatibilidad con múltiples dispositivos.';
-        modal.classList.add('active');
-        AudioEngine.tic(700);
-    }
-    function initCookies() {
-        const bar = document.getElementById('cookieBar');
-        const modal = document.getElementById('infoModal');
-        const accept = document.getElementById('acceptCookiesBtn');
-        const more = document.getElementById('moreInfoBtn');
-        const closeModal = document.getElementById('closeModalBtn');
-        if(!localStorage.getItem('mizu_cookie_consent')) bar.style.display = 'flex';
-        else bar.style.display = 'none';
-        accept.onclick = () => { localStorage.setItem('mizu_cookie_consent','true'); bar.style.display = 'none'; AudioEngine.tic(420); };
-        more.onclick = () => { document.getElementById('modalText').innerHTML = '🍪 Cookies técnicas: tema y consentimiento. No se recogen datos personales.'; modal.classList.add('active'); AudioEngine.tic(680); };
-        const hideModal = () => modal.classList.remove('active');
-        closeModal.onclick = hideModal;
-        modal.onclick = (e) => { if(e.target === modal) hideModal(); };
-        document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && modal.classList.contains('active')) hideModal(); });
     }
 
     function loadFromURL() {
@@ -696,10 +772,12 @@
         });
     }
 
-    // Global: ESC/Backspace para retroceder
+    // Global: ESC/Backspace para retroceder (solo si no hay modal activo)
     window.addEventListener('keydown', (e) => {
+        const modalActive = document.querySelector('.modal-overlay.active');
+        if (modalActive) return; // dejar que el modal maneje ESC
         if(e.key === 'Escape' || e.key === 'Backspace') {
-            if(historyStack.length > 1 && !document.querySelector('.modal-overlay.active')) {
+            if(historyStack.length > 1) {
                 e.preventDefault();
                 AudioEngine.tic(550);
                 historyStack.pop();
@@ -716,8 +794,8 @@
         initCookies();
         attachScrollFocusSync();
         setupFloatingButtonsFocus();
+        setupSupportButton();
         document.getElementById('themeBtn').addEventListener('click', cycleTheme);
-        document.getElementById('supportBtn').addEventListener('click', showSupportModal);
         window.addEventListener('hashchange', loadFromURL);
         const resumeAudio = () => {
             if(AudioEngine.ctx && AudioEngine.ctx.state === 'suspended') AudioEngine.ctx.resume();
