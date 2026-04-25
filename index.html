@@ -44,7 +44,7 @@
             box-sizing: border-box;
         }
 
-        /* TEMAS MEJORADOS (5 estilos) */
+        /* TEMAS (5 estilos) */
         body {
             transition: background 0.2s, color 0.2s;
             font-family: system-ui, 'Segoe UI', 'Inter', sans-serif;
@@ -104,7 +104,6 @@
             color: var(--text-light);
         }
 
-        /* Breadcrumbs (navbar) focusable */
         .hud-nav {
             position: fixed;
             top: 0;
@@ -145,7 +144,6 @@
             color: var(--bg-dark);
         }
 
-        /* Stage scroll */
         #stage {
             width: 100vw;
             height: 100vh;
@@ -155,7 +153,6 @@
             scroll-behavior: smooth;
         }
 
-        /* Nodos */
         .node {
             flex: 0 0 auto;
             display: flex;
@@ -237,7 +234,6 @@
             white-space: pre-line;
         }
 
-        /* animación suave */
         .zoom-forward {
             transform: scale(0.94) translateY(18px);
             opacity: 0;
@@ -252,7 +248,6 @@
             100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0);}
         }
 
-        /* Botones flotantes (focusables) */
         .floating-buttons {
             position: fixed;
             bottom: 24px;
@@ -286,12 +281,7 @@
             background: var(--hex-blue);
             color: var(--bg-dark);
         }
-        .float-btn:hover {
-            background: var(--hex-blue);
-            color: var(--bg-dark);
-        }
 
-        /* Modales con focus trap */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -334,12 +324,6 @@
             background: var(--hex-blue);
             color: var(--bg-dark);
         }
-        .modal-card .modal-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
         .cookie-bar {
             position: fixed;
             bottom: 20px;
@@ -365,6 +349,11 @@
             color: var(--hex-blue);
             cursor: pointer;
         }
+        .cookie-bar button:focus-visible {
+            outline: 2px solid var(--hex-gold);
+            background: var(--hex-blue);
+            color: var(--bg-dark);
+        }
     </style>
 </head>
 <body data-theme="esports">
@@ -378,7 +367,7 @@
 </div>
 
 <div id="cookieBar" class="cookie-bar" style="display: none;">
-    <p>🍪 Usamos cookies técnicas para recordar tu tema y preferencias. No almacenamos datos personales.</p>
+    <p>🍪 Usamos cookies técnicas para recordar tu tema. No datos personales.</p>
     <div style="display: flex; gap: 10px;">
         <button id="moreInfoBtn">ℹ️ Más info</button>
         <button id="acceptCookiesBtn">Aceptar</button>
@@ -389,7 +378,7 @@
     <div class="modal-card">
         <h3 style="color: var(--hex-gold); margin-bottom: 12px;">Información</h3>
         <p id="modalText"></p>
-        <div class="modal-buttons" id="modalButtons">
+        <div class="modal-buttons">
             <button id="closeModalBtn">Entendido</button>
         </div>
     </div>
@@ -418,50 +407,38 @@
         }
     };
 
-    // ========== BASE DE DATOS (rama inicial: Controles + patrones) ==========
+    // ========== BASE DE DATOS ==========
     const db = {
         '🏠 INICIO': {
             items: ['🎮 Controles / Ayuda', '🔷 Ejemplo: 3 opciones', '🚫 Callejón sin salida', '🌀 Dispersión (6 opciones)', '🐙 Profundidad infinita'],
-            desc: 'Centro de navegación universal. Usa ↑↓ para moverte entre opciones, ←→ en el navbar. Flecha arriba en el primer nodo lleva al navbar. Flecha abajo en el último nodo mueve a los botones flotantes.'
+            desc: 'Centro de navegación universal. Usa ↑↓ para moverte entre opciones, ←→ en el navbar. ↑ en primer nodo va al navbar, ↓ en último nodo a botones.'
         },
         '🎮 Controles / Ayuda': {
             items: ['⌨️ Teclado', '🎮 Mando (Gamepad)', '📺 Smart TV / Control Remoto', '🖱️ Ratón / Táctil'],
-            desc: 'Selecciona tu dispositivo para ver los comandos específicos y cómo navegar con fluidez.'
+            desc: 'Selecciona tu dispositivo para ver comandos.'
         },
-        '⌨️ Teclado': {
-            items: [],
-            desc: '✅ Flechas ↑↓ : mover entre nodos (misma animación suave)\n✅ Enter : seleccionar / entrar en rama\n✅ ESC / Backspace : retroceder\n✅ Flechas ←→ : navegar entre migas (navbar)\n✅ Flecha arriba en primer nodo → foco al navbar\n✅ Flecha abajo en último nodo → foco a botones (Temas / Apoyar)'
-        },
-        '🎮 Mando (Gamepad)': {
-            items: [],
-            desc: '✅ D-pad arriba/abajo : navegar entre nodos\n✅ Botón A (Xbox) / Cruz (Play) / B (Nintendo) : Enter\n✅ Botón B / Atrás : ESC / retroceder\n✅ Gatillos izquierdo/derecho o D-pad izquierda/derecha : navegar por navbar\n✅ La misma fluidez y sonido que teclado.'
-        },
-        '📺 Smart TV / Control Remoto': {
-            items: [],
-            desc: '✅ Flechas direccionales del control remoto (modo foco)\n✅ Botón OK / Enter : seleccionar\n✅ Botón Volver / Exit : retroceder\n✅ Navegación entre nodos y navbar con flechas.\n✅ Si el TV activa "mouse virtual", desactívalo desde los ajustes remoto.\n✅ Desde el primer nodo, pulsa ↑ para ir al menú superior.\n✅ Desde el último nodo, pulsa ↓ para acceder a los botones flotantes.'
-        },
-        '🖱️ Ratón / Táctil': {
-            items: [],
-            desc: '✅ Scroll con rueda : desplazamiento suave entre nodos\n✅ Clic en cualquier nodo : seleccionar\n✅ Clic en migas de pan : retroceder a ese punto\n✅ Botones flotantes : clic para cambiar tema / apoyar\n✅ La animación es idéntica a la navegación por teclado.'
-        },
-        '🔷 Ejemplo: 3 opciones': { items: ['Opción Alpha', 'Opción Beta', 'Opción Gamma'], desc: 'Nodo con 3 ramas hijas.' },
+        '⌨️ Teclado': { items: [], desc: '↑↓: mover nodos | Enter: seleccionar | ESC/Back: retroceder | ←→: navbar | ↑ en primer nodo: navbar | ↓ en último nodo: botones' },
+        '🎮 Mando (Gamepad)': { items: [], desc: 'D-pad ↑↓: nodos | A/Enter: seleccionar | B/Escape: atrás | ←→: navbar | Navegación fluida.' },
+        '📺 Smart TV / Control Remoto': { items: [], desc: 'Flechas direccionales (modo foco). OK: seleccionar. Volver: atrás. Si tienes "mouse virtual", desactívalo. El foco siempre recuperable con flechas.' },
+        '🖱️ Ratón / Táctil': { items: [], desc: 'Scroll suave, clic en nodos, clic en migas, botones flotantes.' },
+        '🔷 Ejemplo: 3 opciones': { items: ['Opción Alpha', 'Opción Beta', 'Opción Gamma'], desc: 'Tres ramas hijas.' },
         'Opción Alpha': { items: [], desc: 'Dead end.' },
         'Opción Beta': { items: [], desc: 'Dead end.' },
         'Opción Gamma': { items: [], desc: 'Dead end.' },
-        '🚫 Callejón sin salida': { items: ['🌑 Sin salida', '🌒 Callejón oscuro'], desc: 'Lleva a dos hojas terminales.' },
+        '🚫 Callejón sin salida': { items: ['🌑 Sin salida', '🌒 Callejón oscuro'], desc: 'Dos hojas terminales.' },
         '🌑 Sin salida': { items: [], desc: 'Dead end.' },
         '🌒 Callejón oscuro': { items: [], desc: 'Dead end.' },
-        '🌀 Dispersión (6 opciones)': { items: ['Item #1','Item #2','Item #3','Item #4','Item #5','Item #6'], desc: 'Rama ancha con 6 opciones.' },
+        '🌀 Dispersión (6 opciones)': { items: ['Item #1','Item #2','Item #3','Item #4','Item #5','Item #6'], desc: '6 opciones.' },
         'Item #1': { items: [], desc: 'Terminal' }, 'Item #2': { items: [], desc: 'Terminal' }, 'Item #3': { items: [], desc: 'Terminal' },
         'Item #4': { items: [], desc: 'Terminal' }, 'Item #5': { items: [], desc: 'Terminal' }, 'Item #6': { items: [], desc: 'Terminal' },
-        '🐙 Profundidad infinita': { items: ['Profundidad_N1'], desc: 'Profundidad infinita (haz clic para bajar niveles)' }
+        '🐙 Profundidad infinita': { items: ['Profundidad_N1'], desc: 'Profundidad infinita.' }
     };
 
     function getDynamicDepth(itemName) {
         const match = itemName.match(/^Profundidad_N(\d+)$/);
         if (match) {
             const level = parseInt(match[1], 10);
-            return { items: [`Profundidad_N${level+1}`], desc: `🐙 Nivel ${level} — baja más. El breadcrumb soporta rutas largas.` };
+            return { items: [`Profundidad_N${level+1}`], desc: `🐙 Nivel ${level} — sigue bajando.` };
         }
         return null;
     }
@@ -481,7 +458,7 @@
             const dynamic = getDynamicDepth(currentNode);
             if (dynamic) data = dynamic;
             else if (db[currentNode]) data = { items: db[currentNode].items, desc: db[currentNode].desc };
-            else data = { items: [], desc: `📌 Nodo terminal. Sin más opciones.` };
+            else data = { items: [], desc: `📌 Nodo terminal.` };
             const hasItems = data.items && data.items.length > 0;
             if (!hasItems) {
                 const leaf = document.createElement('div');
@@ -526,10 +503,8 @@
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 if (idx === nodes.length - 1) {
-                    // Último nodo: mover foco a botones flotantes (Temas)
                     const themeBtn = document.getElementById('themeBtn');
                     if (themeBtn) themeBtn.focus();
-                    return;
                 } else {
                     const next = nodes[idx + 1];
                     if (next) { next.focus(); next.scrollIntoView({ behavior: 'smooth', block: 'start' }); lastFocusedNode = next; }
@@ -538,7 +513,7 @@
                 e.preventDefault();
                 if (idx === 0) {
                     const firstCrumb = document.querySelector('.crumb');
-                    if (firstCrumb) { firstCrumb.focus(); }
+                    if (firstCrumb) firstCrumb.focus();
                 } else {
                     const prev = nodes[idx - 1];
                     if (prev) { prev.focus(); prev.scrollIntoView({ behavior: 'smooth', block: 'start' }); lastFocusedNode = prev; }
@@ -550,12 +525,11 @@
 
     function getDynamicDesc(name) {
         if (db[name] && db[name].desc) return db[name].desc;
-        if (name.match(/^Profundidad_N\d+$/)) return `🐙 Profundidad dinámica. Sigue bajando niveles.`;
+        if (name.match(/^Profundidad_N\d+$/)) return `🐙 Profundidad dinámica. Sigue bajando.`;
         return `Explora "${name}".`;
     }
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
 
-    // NAVBAR con navegación horizontal y Enter
     function updateHUD() {
         const nav = document.getElementById('hud-nav');
         nav.innerHTML = '';
@@ -603,19 +577,14 @@
         if (nav.lastChild) nav.lastChild.scrollIntoView({ behavior: 'smooth', inline: 'end' });
     }
 
-    // ----- FOCUS EN BOTONES FLOTANTES (cíclico y regreso al stage) -----
     function setupFloatingButtonsFocus() {
         const themeBtn = document.getElementById('themeBtn');
         const supportBtn = document.getElementById('supportBtn');
-        
         supportBtn.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 const firstNode = document.querySelector('.node');
-                if (firstNode) {
-                    firstNode.focus();
-                    firstNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+                if (firstNode) { firstNode.focus(); firstNode.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 themeBtn.focus();
@@ -642,7 +611,32 @@
         });
     }
 
-    // ----- MODAL FOCUS TRAP -----
+    // Gestión de foco perdido: cualquier flecha de dirección reenfoca el elemento más lógico
+    function setupGlobalFocusRecovery() {
+        window.addEventListener('keydown', (e) => {
+            if (e.key.startsWith('Arrow')) {
+                const active = document.activeElement;
+                const isBody = active === document.body || active === document.documentElement;
+                const isModal = document.querySelector('.modal-overlay.active');
+                if (isModal) return; // el modal maneja su foco
+                if (isBody || (active && active.classList && active.classList.contains('node') === false && 
+                    active.id !== 'themeBtn' && active.id !== 'supportBtn' && active.classList?.contains('crumb') === false)) {
+                    // foco perdido: intentar recuperar
+                    e.preventDefault();
+                    const firstNode = document.querySelector('.node');
+                    if (firstNode) {
+                        firstNode.focus();
+                        firstNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        const firstCrumb = document.querySelector('.crumb');
+                        if (firstCrumb) firstCrumb.focus();
+                    }
+                }
+            }
+        });
+    }
+
+    // MODAL con focus automático
     let previousActiveElement = null;
     function openModal(modalId, customContent = null) {
         const modal = document.getElementById(modalId);
@@ -650,22 +644,24 @@
         if (customContent) modalText.innerHTML = customContent;
         previousActiveElement = document.activeElement;
         modal.classList.add('active');
-        const firstButton = modal.querySelector('button');
-        if (firstButton) firstButton.focus();
-        const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
+        const closeBtn = document.getElementById('closeModalBtn');
+        if (closeBtn) closeBtn.focus();
         const trap = (e) => {
-            if (e.key !== 'Tab') return;
-            if (e.shiftKey) {
-                if (document.activeElement === first) {
-                    e.preventDefault();
-                    last.focus();
-                }
-            } else {
-                if (document.activeElement === last) {
-                    e.preventDefault();
-                    first.focus();
+            const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === first) {
+                        e.preventDefault();
+                        last.focus();
+                    }
+                } else {
+                    if (document.activeElement === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
                 }
             }
         };
@@ -687,9 +683,13 @@
             delete modal._trapHandler;
         }
         if (previousActiveElement && previousActiveElement.focus) previousActiveElement.focus();
+        else {
+            const firstNode = document.querySelector('.node');
+            if (firstNode) firstNode.focus();
+        }
     }
 
-    // ----- COOKIES Y MODALES -----
+    // COOKIES: foco inicial en "Aceptar", navegación entre botones
     function initCookies() {
         const bar = document.getElementById('cookieBar');
         const acceptBtn = document.getElementById('acceptCookiesBtn');
@@ -697,23 +697,44 @@
         const closeModalBtn = document.getElementById('closeModalBtn');
         if (!localStorage.getItem('mizu_cookie_consent')) {
             bar.style.display = 'flex';
+            // Enfocar el botón "Aceptar"
+            acceptBtn.focus();
+            // Navegación entre los dos botones con flechas izquierda/derecha
+            const buttons = [moreBtn, acceptBtn];
+            const handleKey = (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (document.activeElement === acceptBtn) moreBtn.focus();
+                    else if (document.activeElement === moreBtn) acceptBtn.focus();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    if (document.activeElement === moreBtn) acceptBtn.focus();
+                    else if (document.activeElement === acceptBtn) moreBtn.focus();
+                }
+            };
+            bar.addEventListener('keydown', handleKey);
+            acceptBtn.onclick = () => {
+                localStorage.setItem('mizu_cookie_consent', 'true');
+                bar.style.display = 'none';
+                AudioEngine.tic(420);
+                bar.removeEventListener('keydown', handleKey);
+                const firstNode = document.querySelector('.node');
+                if (firstNode) firstNode.focus();
+            };
+            moreBtn.onclick = () => {
+                openModal('infoModal', '🍪 Cookies técnicas: almacenan tu preferencia de tema y consentimiento. No hay rastreo.');
+                bar.removeEventListener('keydown', handleKey);
+            };
         } else {
             bar.style.display = 'none';
+            const firstNode = document.querySelector('.node');
+            if (firstNode) firstNode.focus();
         }
-        acceptBtn.onclick = () => {
-            localStorage.setItem('mizu_cookie_consent', 'true');
-            bar.style.display = 'none';
-            AudioEngine.tic(420);
-        };
-        moreBtn.onclick = () => {
-            openModal('infoModal', '🍪 Este sitio utiliza cookies técnicas para almacenar tu preferencia de tema y el consentimiento. No se recopilan datos personales ni se rastrea tu actividad. Puedes aceptar o rechazar (al rechazar, no se guardará tu tema).');
-        };
         closeModalBtn.onclick = () => {
             closeModal('infoModal');
         };
     }
 
-    // Botón apoyar: abre PayPal en nueva pestaña
     function setupSupportButton() {
         const supportBtn = document.getElementById('supportBtn');
         supportBtn.onclick = () => {
@@ -743,7 +764,6 @@
         render('🏠 INICIO');
     }
 
-    // Scroll sync: mantener foco en nodo central al hacer scroll
     function attachScrollFocusSync() {
         const stage = document.getElementById('stage');
         let ticking = false;
@@ -769,7 +789,6 @@
         });
     }
 
-    // Global: ESC/Backspace para retroceder (solo si no hay modal activo)
     window.addEventListener('keydown', (e) => {
         const modalActive = document.querySelector('.modal-overlay.active');
         if (modalActive) return;
@@ -788,12 +807,14 @@
         AudioEngine.init();
         loadSavedTheme();
         loadFromURL();
-        initCookies();
         attachScrollFocusSync();
         setupFloatingButtonsFocus();
         setupSupportButton();
+        setupGlobalFocusRecovery();
         document.getElementById('themeBtn').addEventListener('click', cycleTheme);
         window.addEventListener('hashchange', loadFromURL);
+        // Inicializar cookies después de que el DOM tenga los nodos
+        setTimeout(() => initCookies(), 100);
         const resumeAudio = () => {
             if(AudioEngine.ctx && AudioEngine.ctx.state === 'suspended') AudioEngine.ctx.resume();
             document.removeEventListener('click', resumeAudio);
