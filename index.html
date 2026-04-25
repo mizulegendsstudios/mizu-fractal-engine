@@ -36,7 +36,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Mizu Engine · Navegación adaptativa + Temas + Donar</title>
+    <title>Mizu Engine · Navegación Total + Navbar Focus</title>
     <style>
         * {
             margin: 0;
@@ -44,7 +44,7 @@
             box-sizing: border-box;
         }
 
-        /* TEMAS MEJORADOS (5 estilos vibrantes) */
+        /* TEMAS MEJORADOS (5 estilos) */
         body {
             transition: background 0.2s, color 0.2s;
             font-family: system-ui, 'Segoe UI', 'Inter', sans-serif;
@@ -53,7 +53,6 @@
             overflow: hidden;
         }
 
-        /* Tema 1: Esports Gold (original mejorado) */
         body[data-theme="esports"] {
             --hex-gold: #f0b34b;
             --hex-blue: #2ad4c4;
@@ -63,7 +62,6 @@
             --card-bg: radial-gradient(ellipse at 50% 30%, rgba(42,212,196,0.12), #071a24);
             --border-glow: rgba(240,179,75,0.4);
         }
-        /* Tema 2: Cyberpunk Neon */
         body[data-theme="neon"] {
             --hex-gold: #ff3d6c;
             --hex-blue: #0afff0;
@@ -73,7 +71,6 @@
             --card-bg: radial-gradient(ellipse at 50% 30%, rgba(255,61,108,0.15), #04041a);
             --border-glow: #ff3d6c80;
         }
-        /* Tema 3: Retro Terminal Matrix */
         body[data-theme="retro"] {
             --hex-gold: #bfff40;
             --hex-blue: #3eff9e;
@@ -83,7 +80,6 @@
             --card-bg: radial-gradient(ellipse at 50% 30%, rgba(191,255,64,0.1), #0a1a0a);
             --border-glow: #bfff4060;
         }
-        /* Tema 4: Oceanic Dream */
         body[data-theme="oceanic"] {
             --hex-gold: #7ef9ff;
             --hex-blue: #00c2ff;
@@ -93,7 +89,6 @@
             --card-bg: radial-gradient(ellipse at 50% 30%, rgba(126,249,255,0.1), #02121f);
             --border-glow: #7ef9ff70;
         }
-        /* Tema 5: Sunset Royal */
         body[data-theme="sunset"] {
             --hex-gold: #ffb86b;
             --hex-blue: #ff6b8b;
@@ -109,14 +104,14 @@
             color: var(--text-light);
         }
 
-        /* Breadcrumbs */
+        /* Breadcrumbs (navbar) - ahora focusable */
         .hud-nav {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             padding: 12px 20px;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(16px);
             z-index: 1100;
             display: flex;
@@ -137,11 +132,17 @@
             color: var(--hex-gold);
             cursor: pointer;
             transition: 0.2s;
+            outline: none;
+        }
+        .crumb:focus-visible {
+            outline: 2px solid var(--hex-blue);
+            background: var(--hex-blue);
+            color: var(--bg-dark);
+            transform: scale(1.02);
         }
         .crumb:hover {
             background: var(--hex-blue);
             color: var(--bg-dark);
-            border-color: var(--hex-blue);
         }
 
         /* Stage scroll */
@@ -151,10 +152,10 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
-            scroll-behavior: smooth; /* scroll suave nativo para rueda */
+            scroll-behavior: smooth;
         }
 
-        /* Nodos / tarjetas */
+        /* Nodos */
         .node {
             flex: 0 0 auto;
             display: flex;
@@ -167,7 +168,7 @@
             cursor: pointer;
             outline: none;
             padding: 1.8rem;
-            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, background 0.2s;
         }
         .node:focus-visible {
             outline: 3px solid var(--hex-blue);
@@ -195,7 +196,6 @@
             }
             .node h2 {
                 font-size: 1.4rem !important;
-                word-break: break-word;
             }
             .node-detail {
                 display: none;
@@ -236,7 +236,7 @@
             margin-top: 14px;
         }
 
-        /* animación de entrada y salida suave */
+        /* animación suave */
         .zoom-forward {
             transform: scale(0.94) translateY(18px);
             opacity: 0;
@@ -251,7 +251,7 @@
             100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0);}
         }
 
-        /* Botones flotantes (Temas + Apoyar) */
+        /* Botones flotantes */
         .floating-buttons {
             position: fixed;
             bottom: 24px;
@@ -277,16 +277,13 @@
             gap: 8px;
             transition: 0.2s;
             font-family: monospace;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         .float-btn:hover {
             background: var(--hex-blue);
             color: var(--bg-dark);
-            border-color: var(--hex-blue);
-            transform: scale(1.02);
         }
 
-        /* Modal cookie / apoyar */
+        /* Modal cookie / apoyo */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -312,15 +309,6 @@
             padding: 28px;
             text-align: center;
         }
-        .modal-card button {
-            background: var(--hex-blue);
-            border: none;
-            padding: 8px 24px;
-            border-radius: 40px;
-            margin-top: 16px;
-            cursor: pointer;
-            font-weight: bold;
-        }
         .cookie-bar {
             position: fixed;
             bottom: 20px;
@@ -337,15 +325,6 @@
             align-items: center;
             gap: 12px;
             z-index: 2100;
-            font-size: 0.8rem;
-        }
-        .cookie-bar button {
-            background: transparent;
-            border: 1px solid var(--hex-blue);
-            padding: 6px 16px;
-            border-radius: 40px;
-            color: var(--hex-blue);
-            cursor: pointer;
         }
     </style>
 </head>
@@ -356,32 +335,30 @@
 
 <div class="floating-buttons">
     <div class="float-btn" id="themeBtn">🎨 Cambiar tema</div>
-    <div class="float-btn" id="supportBtn">❤️ Apoyar proyecto</div>
+    <div class="float-btn" id="supportBtn">❤️ Apoyar</div>
 </div>
 
 <div id="cookieBar" class="cookie-bar" style="display: none;">
-    <p>🍪 Este sitio usa cookies técnicas (tema, navegación). Sin datos personales.</p>
+    <p>🍪 Cookies técnicas (tema, preferencias). Sin datos personales.</p>
     <div style="display: flex; gap: 10px;">
-        <button id="moreInfoBtn">ℹ️ Más info</button>
+        <button id="moreInfoBtn">ℹ️ Info</button>
         <button id="acceptCookiesBtn">Aceptar</button>
     </div>
 </div>
 
 <div id="infoModal" class="modal-overlay">
     <div class="modal-card">
-        <h3 style="color: var(--hex-gold);">✨ Información</h3>
-        <p id="modalText">Cookies funcionales para recordar preferencias. No rastreamos.</p>
+        <h3 style="color: var(--hex-gold);">Información</h3>
+        <p id="modalText"></p>
         <button id="closeModalBtn">Entendido</button>
     </div>
 </div>
 
 <script>
-    // Motor de audio suave
+    // Audio Engine
     const AudioEngine = {
         ctx: null,
-        init() {
-            if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        },
+        init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
         tic(freq = 800) {
             if (!this.ctx) this.init();
             if (this.ctx.state === 'suspended') this.ctx.resume().catch(()=>{});
@@ -400,135 +377,71 @@
         }
     };
 
-    // ========== BASE DE DATOS COMPLETA (patrones visibles) ==========
+    // ========== BASE DE DATOS (patrones) ==========
     const db = {
         '🏠 INICIO': {
             items: ['🔷 Ejemplo: 3 opciones', '🚫 Callejón sin salida', '🌀 Dispersión (6 opciones)', '🐙 Profundidad infinita', '📖 Ayuda / Guía'],
-            desc: 'Panel maestro. Cada opción muestra un patrón distinto de navegación. Usa scroll o flechas ↑↓ para moverte entre opciones (misma animación suave). Botones flotantes: Temas y Apoyar.'
+            desc: 'Panel maestro. Navega con ↑↓ (entre nodos) o ↑ hacia el navbar. Con flechas izquierda/derecha en el navbar navegas entre migas.'
         },
-        '🔷 Ejemplo: 3 opciones': {
-            items: ['Opción Alpha', 'Opción Beta', 'Opción Gamma'],
-            desc: 'Nodo con exactamente 3 ramas hijas. Todas conducen a hojas (dead ends).'
-        },
-        'Opción Alpha': { items: [], desc: 'Dead end clásico. Sin más opciones. Usa ESC / Backspace para retroceder.' },
-        'Opción Beta': { items: [], desc: 'Punto ciego. Regresa con las migas o tecla atrás.' },
-        'Opción Gamma': { items: [], desc: 'Final de rama. Explora otros caminos.' },
-        '🚫 Callejón sin salida': {
-            items: ['🌑 Sin salida directa', '🌒 Callejón oscuro'],
-            desc: 'Este nodo lleva a dos hojas terminales, mostrando un callejón sin salida. Prueba la navegación.'
-        },
-        '🌑 Sin salida directa': { items: [], desc: 'Hoja sin hijos. Fin del camino.' },
-        '🌒 Callejón oscuro': { items: [], desc: 'También es un dead end. Retrocede con ESC.' },
-        '🌀 Dispersión (6 opciones)': {
-            items: ['Item #1', 'Item #2', 'Item #3', 'Item #4', 'Item #5', 'Item #6'],
-            desc: 'Rama ancha con 6 opciones. Ideal para demostrar UI de dispersión.'
-        },
-        'Item #1': { items: [], desc: 'Elemento disperso - terminal' },
-        'Item #2': { items: [], desc: 'Elemento disperso - terminal' },
-        'Item #3': { items: [], desc: 'Elemento disperso - terminal' },
-        'Item #4': { items: [], desc: 'Elemento disperso - terminal' },
-        'Item #5': { items: [], desc: 'Elemento disperso - terminal' },
-        'Item #6': { items: [], desc: 'Elemento disperso - terminal' },
-        '🐙 Profundidad infinita': {
-            items: ['Profundidad_N1'],
-            desc: 'Haz clic repetidamente para bajar niveles infinitos. El breadcrumb se alarga y la URL se actualiza. Perfecto para probar navegación profunda.'
-        },
-        '📖 Ayuda / Guía': {
-            items: ['Navegación por teclado', 'Temas visuales', 'Scroll vs Flechas', 'Ramas explicadas'],
-            desc: 'Tutorial interactivo del motor.'
-        },
-        'Navegación por teclado': { items: [], desc: '↑ ↓ : mover entre opciones. Enter: seleccionar. ESC / Backspace: retroceder. También funciona con mandos genéricos (teclas direccionales).' },
-        'Temas visuales': { items: [], desc: 'Botón flotante 🎨 Cambiar tema: cicla 5 estilos únicos. El tema se guarda en localStorage.' },
-        'Scroll vs Flechas': { items: [], desc: 'Tanto scroll con rueda como flechas producen scroll suave idéntico. La transición entre nodos es siempre fluida y armónica.' },
-        'Ramas explicadas': { items: [], desc: '3 opciones, dead end, dispersión (6 items), profundidad infinita. Cada una demuestra un patrón arquitectónico.' }
+        '🔷 Ejemplo: 3 opciones': { items: ['Opción Alpha', 'Opción Beta', 'Opción Gamma'], desc: 'Nodo con 3 ramas hijas.' },
+        'Opción Alpha': { items: [], desc: 'Dead end.' },
+        'Opción Beta': { items: [], desc: 'Dead end.' },
+        'Opción Gamma': { items: [], desc: 'Dead end.' },
+        '🚫 Callejón sin salida': { items: ['🌑 Sin salida', '🌒 Callejón oscuro'], desc: 'Lleva a dos hojas terminales.' },
+        '🌑 Sin salida': { items: [], desc: 'Dead end.' },
+        '🌒 Callejón oscuro': { items: [], desc: 'Dead end.' },
+        '🌀 Dispersión (6 opciones)': { items: ['Item #1','Item #2','Item #3','Item #4','Item #5','Item #6'], desc: 'Rama ancha con 6 opciones.' },
+        'Item #1': { items: [], desc: 'Terminal' }, 'Item #2': { items: [], desc: 'Terminal' }, 'Item #3': { items: [], desc: 'Terminal' },
+        'Item #4': { items: [], desc: 'Terminal' }, 'Item #5': { items: [], desc: 'Terminal' }, 'Item #6': { items: [], desc: 'Terminal' },
+        '🐙 Profundidad infinita': { items: ['Profundidad_N1'], desc: 'Profundidad infinita (haz clic para bajar)' },
+        '📖 Ayuda / Guía': { items: ['Navegación avanzada', 'Temas', 'Scroll vs Flechas'], desc: 'Tutorial' },
+        'Navegación avanzada': { items: [], desc: '↑↓ entre nodos. En el primero, ↑ va al navbar. ←→ en navbar navega entre migas. ↓ desde navbar vuelve al stage.' },
+        'Temas': { items: [], desc: 'Botón flotante cambia 5 temas. Se guarda.' },
+        'Scroll vs Flechas': { items: [], desc: 'Ambos usan scroll suave. La animación es idéntica.' }
     };
 
-    // Generador de profundidad dinámica (soporta niveles infinitos)
     function getDynamicDepth(itemName) {
         const match = itemName.match(/^Profundidad_N(\d+)$/);
         if (match) {
             const level = parseInt(match[1], 10);
-            const nextLevel = level + 1;
-            const nextName = `Profundidad_N${nextLevel}`;
-            return {
-                items: [nextName],
-                desc: `🐙 Nivel ${level} — sumérgete más. Breadcrumb soporta rutas largas.`
-            };
+            return { items: [`Profundidad_N${level+1}`], desc: `🐙 Nivel ${level} — baja más.` };
         }
         return null;
     }
 
     let historyStack = ['🏠 INICIO'];
+    let currentStageFocusIndex = 0; // índice del nodo enfocado (opcional)
+    let lastFocusedNode = null;
 
-    function updateURL() {
-        const path = historyStack.map(encodeURIComponent).join('/');
-        window.location.hash = path;
-    }
+    function updateURL() { window.location.hash = historyStack.map(encodeURIComponent).join('/'); }
 
-    // Render principal con animación spawn y scroll suave al primer elemento
-    function render(currentNode, direction = 'forward') {
+    function render(currentNode) {
         const stageEl = document.getElementById('stage');
         const oldNodes = document.querySelectorAll('.node');
         oldNodes.forEach(n => n.classList.add('zoom-forward'));
-
         setTimeout(() => {
             stageEl.innerHTML = '';
             let data = null;
             const dynamic = getDynamicDepth(currentNode);
             if (dynamic) data = dynamic;
             else if (db[currentNode]) data = { items: db[currentNode].items, desc: db[currentNode].desc };
-            else data = { items: [], desc: `📌 "${currentNode}" es un nodo final. Usa las migas o ESC.` };
-
+            else data = { items: [], desc: `📌 Nodo terminal.` };
             const hasItems = data.items && data.items.length > 0;
-
             if (!hasItems) {
                 const leaf = document.createElement('div');
                 leaf.className = 'node spawn-in';
                 leaf.tabIndex = 0;
-                leaf.innerHTML = `
-                    <div class="node-tag">🏁 DEAD END</div>
-                    <h2>${escapeHtml(currentNode)}</h2>
-                    <div class="node-detail">${escapeHtml(data.desc)}</div>
-                `;
-                leaf.onclick = () => {};
+                leaf.innerHTML = `<div class="node-tag">🏁 DEAD END</div><h2>${escapeHtml(currentNode)}</h2><div class="node-detail">${escapeHtml(data.desc)}</div>`;
                 stageEl.appendChild(leaf);
+                attachNodeEvents(leaf);
             } else {
                 data.items.forEach(childName => {
                     const div = document.createElement('div');
                     div.className = 'node spawn-in';
                     div.tabIndex = 0;
-                    div.innerHTML = `
-                        <div class="node-tag">➡️ ${escapeHtml(currentNode)}</div>
-                        <h2>${escapeHtml(childName)}</h2>
-                        <div class="node-detail">${escapeHtml(getDynamicDesc(childName))}</div>
-                    `;
-                    div.onclick = (e) => {
-                        e.stopPropagation();
-                        AudioEngine.tic(1100);
-                        historyStack.push(childName);
-                        updateURL();
-                        render(childName, 'forward');
-                    };
-                    // Navegación por teclado (flechas) con scroll suave idéntico al scroll con rueda
-                    div.onkeydown = (e) => {
-                        if (e.key === 'Enter') div.click();
-                        if (e.key === 'ArrowDown') {
-                            e.preventDefault();
-                            const next = div.nextElementSibling;
-                            if (next) {
-                                next.focus();
-                                next.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                        }
-                        if (e.key === 'ArrowUp') {
-                            e.preventDefault();
-                            const prev = div.previousElementSibling;
-                            if (prev) {
-                                prev.focus();
-                                prev.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                        }
-                    };
+                    div.innerHTML = `<div class="node-tag">➡️ ${escapeHtml(currentNode)}</div><h2>${escapeHtml(childName)}</h2><div class="node-detail">${escapeHtml(getDynamicDesc(childName))}</div>`;
+                    div.onclick = (e) => { e.stopPropagation(); navigateToChild(childName); };
+                    attachNodeEvents(div);
                     stageEl.appendChild(div);
                 });
             }
@@ -536,148 +449,167 @@
             const firstNode = stageEl.querySelector('.node');
             if (firstNode) {
                 firstNode.focus();
-                // scroll suave al inicio del nodo (como lo haría el scroll con rueda)
                 firstNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                lastFocusedNode = firstNode;
             }
         }, 260);
     }
 
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
-        });
+    function navigateToChild(childName) {
+        AudioEngine.tic(1100);
+        historyStack.push(childName);
+        updateURL();
+        render(childName);
+    }
+
+    function attachNodeEvents(node) {
+        node.onkeydown = (e) => {
+            if (e.key === 'Enter') { node.click(); return; }
+            const nodes = Array.from(document.querySelectorAll('.node'));
+            const idx = nodes.indexOf(node);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = nodes[idx + 1];
+                if (next) { next.focus(); next.scrollIntoView({ behavior: 'smooth', block: 'start' }); lastFocusedNode = next; }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (idx === 0) {
+                    // Primer nodo: saltar al navbar (primer crumb)
+                    const firstCrumb = document.querySelector('.crumb');
+                    if (firstCrumb) { firstCrumb.focus(); }
+                } else {
+                    const prev = nodes[idx - 1];
+                    if (prev) { prev.focus(); prev.scrollIntoView({ behavior: 'smooth', block: 'start' }); lastFocusedNode = prev; }
+                }
+            }
+        };
+        // Almacenar referencia para posible retorno desde navbar
+        node.addEventListener('focus', () => { lastFocusedNode = node; });
     }
 
     function getDynamicDesc(name) {
         if (db[name] && db[name].desc) return db[name].desc;
-        if (name.match(/^Profundidad_N\d+$/)) return `🐙 Nodo generado dinámicamente. Baja más niveles.`;
-        return `Explora "${name}" para continuar.`;
+        if (name.match(/^Profundidad_N\d+$/)) return `🐙 Profundidad dinámica.`;
+        return `Explora "${name}".`;
     }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
 
+    // NAVBAR (breadcrumbs) - ahora con navegación horizontal y foco
     function updateHUD() {
         const nav = document.getElementById('hud-nav');
         nav.innerHTML = '';
         historyStack.forEach((crumb, idx) => {
             const span = document.createElement('span');
             span.className = 'crumb';
-            let display = crumb.length > 24 ? crumb.slice(0, 20) + '…' : crumb;
+            span.tabIndex = 0; // focusable
+            let display = crumb.length > 24 ? crumb.slice(0,20)+'…' : crumb;
             span.innerText = display;
             span.title = crumb;
             span.onclick = () => {
-                if (idx === historyStack.length - 1) return;
+                if (idx === historyStack.length-1) return;
                 AudioEngine.tic(620);
-                historyStack = historyStack.slice(0, idx + 1);
+                historyStack = historyStack.slice(0, idx+1);
                 updateURL();
-                render(historyStack[historyStack.length - 1], 'backward');
+                render(historyStack[historyStack.length-1]);
+            };
+            // navegación horizontal entre crumbs
+            span.onkeydown = (e) => {
+                const crumbs = Array.from(document.querySelectorAll('.crumb'));
+                const currentIdx = crumbs.indexOf(span);
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (currentIdx > 0) crumbs[currentIdx-1].focus();
+                    else if (currentIdx === 0) {
+                        // si es primero y flecha izquierda, ir al último? comportamiento opcional
+                        crumbs[crumbs.length-1].focus();
+                    }
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    if (currentIdx < crumbs.length-1) crumbs[currentIdx+1].focus();
+                    else if (currentIdx === crumbs.length-1) crumbs[0].focus();
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    // volver al stage: enfocar el último nodo conocido o el primero visible
+                    if (lastFocusedNode && document.body.contains(lastFocusedNode)) {
+                        lastFocusedNode.focus();
+                        lastFocusedNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        const firstNode = document.querySelector('.node');
+                        if (firstNode) { firstNode.focus(); firstNode.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    // desde navbar, flecha arriba no tiene destino específico, pero la mantenemos para consistencia (podría quedarse)
+                    e.preventDefault();
+                }
             };
             nav.appendChild(span);
         });
         if (nav.lastChild) nav.lastChild.scrollIntoView({ behavior: 'smooth', inline: 'end' });
     }
 
-    // ----- SISTEMA DE TEMAS (5 estilos mejorados) -----
+    // Temas
     const themes = ['esports', 'neon', 'retro', 'oceanic', 'sunset'];
     let currentThemeIndex = 0;
-    function applyTheme(index) {
-        const themeName = themes[index % themes.length];
-        document.body.setAttribute('data-theme', themeName);
-        localStorage.setItem('mizu_theme', themeName);
-    }
-    function cycleTheme() {
-        currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-        applyTheme(currentThemeIndex);
-        AudioEngine.tic(880);
-    }
+    function applyTheme(idx) { document.body.setAttribute('data-theme', themes[idx]); localStorage.setItem('mizu_theme', themes[idx]); }
+    function cycleTheme() { currentThemeIndex = (currentThemeIndex+1)%themes.length; applyTheme(currentThemeIndex); AudioEngine.tic(880); }
     function loadSavedTheme() {
         const saved = localStorage.getItem('mizu_theme');
-        if (saved && themes.includes(saved)) {
-            currentThemeIndex = themes.indexOf(saved);
-            applyTheme(currentThemeIndex);
-        } else {
-            applyTheme(0);
-        }
+        if(saved && themes.includes(saved)) { currentThemeIndex = themes.indexOf(saved); applyTheme(currentThemeIndex); }
+        else applyTheme(0);
     }
 
-    // ----- APOYAR MODAL -----
+    // Modal y cookies
     function showSupportModal() {
         const modal = document.getElementById('infoModal');
-        const modalText = document.getElementById('modalText');
-        modalText.innerHTML = '❤️ Gracias por apoyar el desarrollo. Este motor demuestra navegación profunda, temas dinámicos y accesibilidad total. Si deseas colaborar, comparte el proyecto. 🚀';
+        document.getElementById('modalText').innerHTML = '❤️ Gracias por apoyar. Este motor demuestra navegación total con foco, temas y patrones.';
         modal.classList.add('active');
         AudioEngine.tic(700);
     }
-
-    // ----- COOKIE MODAL (sin alert) -----
     function initCookies() {
         const bar = document.getElementById('cookieBar');
         const modal = document.getElementById('infoModal');
         const accept = document.getElementById('acceptCookiesBtn');
         const more = document.getElementById('moreInfoBtn');
         const closeModal = document.getElementById('closeModalBtn');
-        const defaultModalText = document.getElementById('modalText');
-        
-        if (!localStorage.getItem('mizu_cookie_consent')) {
-            bar.style.display = 'flex';
-        } else {
-            bar.style.display = 'none';
-        }
-        accept.onclick = () => {
-            localStorage.setItem('mizu_cookie_consent', 'true');
-            bar.style.display = 'none';
-            AudioEngine.tic(420);
-        };
-        more.onclick = () => {
-            defaultModalText.innerHTML = '🍪 Cookies técnicas: guardan tu preferencia de tema y estado de consentimiento. No se comparten datos.';
-            modal.classList.add('active');
-            AudioEngine.tic(680);
-        };
+        if(!localStorage.getItem('mizu_cookie_consent')) bar.style.display = 'flex';
+        else bar.style.display = 'none';
+        accept.onclick = () => { localStorage.setItem('mizu_cookie_consent','true'); bar.style.display = 'none'; AudioEngine.tic(420); };
+        more.onclick = () => { document.getElementById('modalText').innerHTML = '🍪 Cookies técnicas: tema y consentimiento.'; modal.classList.add('active'); AudioEngine.tic(680); };
         const hideModal = () => modal.classList.remove('active');
         closeModal.onclick = hideModal;
         modal.onclick = (e) => { if(e.target === modal) hideModal(); };
         document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && modal.classList.contains('active')) hideModal(); });
     }
 
-    // ----- CARGA DESDE URL -----
     function loadFromURL() {
-        let hash = window.location.hash.substring(1); // remove #
-        if (hash) {
-            const parts = hash.split('/').filter(p => p.trim() !== '').map(decodeURIComponent);
-            if (parts.length) {
-                historyStack = parts;
-                render(historyStack[historyStack.length - 1], 'forward');
-                return;
-            }
+        let hash = window.location.hash.substring(1);
+        if(hash) {
+            const parts = hash.split('/').filter(p=>p.trim()!=='').map(decodeURIComponent);
+            if(parts.length) { historyStack = parts; render(historyStack[historyStack.length-1]); return; }
         }
         historyStack = ['🏠 INICIO'];
-        render('🏠 INICIO', 'forward');
+        render('🏠 INICIO');
     }
 
-    // ----- MEJORA: navegación con scroll también mantiene foco y uniformidad -----
+    // Scroll sync: mantener foco en nodo central al hacer scroll
     function attachScrollFocusSync() {
         const stage = document.getElementById('stage');
         let ticking = false;
         stage.addEventListener('scroll', () => {
-            if (!ticking) {
+            if(!ticking) {
                 requestAnimationFrame(() => {
                     const nodes = document.querySelectorAll('.node');
-                    const viewMid = stage.scrollTop + stage.clientHeight / 2;
-                    let bestNode = null;
-                    let bestDist = Infinity;
+                    if(!nodes.length) return;
+                    const viewMid = stage.scrollTop + stage.clientHeight/2;
+                    let best = null, bestDist = Infinity;
                     nodes.forEach(node => {
                         const rect = node.getBoundingClientRect();
-                        const mid = rect.top + rect.height / 2;
-                        const dist = Math.abs(mid - stage.clientHeight / 2);
-                        if (dist < bestDist) {
-                            bestDist = dist;
-                            bestNode = node;
-                        }
+                        const mid = rect.top + rect.height/2;
+                        const dist = Math.abs(mid - stage.clientHeight/2);
+                        if(dist < bestDist) { bestDist = dist; best = node; }
                     });
-                    if (bestNode && document.activeElement !== bestNode) bestNode.focus();
+                    if(best && document.activeElement !== best) best.focus();
+                    if(best) lastFocusedNode = best;
                     ticking = false;
                 });
                 ticking = true;
@@ -685,33 +617,30 @@
         });
     }
 
-    // Inicialización global
+    // Global: ESC/Backspace para retroceder
+    window.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' || e.key === 'Backspace') {
+            if(historyStack.length > 1 && !document.querySelector('.modal-overlay.active')) {
+                e.preventDefault();
+                AudioEngine.tic(550);
+                historyStack.pop();
+                updateURL();
+                render(historyStack[historyStack.length-1]);
+            }
+        }
+    });
+
     window.onload = () => {
         AudioEngine.init();
         loadSavedTheme();
         loadFromURL();
         initCookies();
         attachScrollFocusSync();
-        
         document.getElementById('themeBtn').addEventListener('click', cycleTheme);
         document.getElementById('supportBtn').addEventListener('click', showSupportModal);
-        
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' || e.key === 'Backspace') {
-                if (historyStack.length > 1) {
-                    e.preventDefault();
-                    AudioEngine.tic(550);
-                    historyStack.pop();
-                    updateURL();
-                    render(historyStack[historyStack.length - 1], 'backward');
-                }
-            }
-        });
         window.addEventListener('hashchange', loadFromURL);
-        
-        // Activar audio tras primer toque
         const resumeAudio = () => {
-            if (AudioEngine.ctx && AudioEngine.ctx.state === 'suspended') AudioEngine.ctx.resume();
+            if(AudioEngine.ctx && AudioEngine.ctx.state === 'suspended') AudioEngine.ctx.resume();
             document.removeEventListener('click', resumeAudio);
             document.removeEventListener('touchstart', resumeAudio);
         };
