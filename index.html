@@ -31,607 +31,674 @@
  * @version 2.3.0 - Edición "Illustrator Pastel"
  * =============================================================================
  -->
+This is a complete, stable HTML document that creates an interactive, multi-level navigation interface for Mizu Esports, featuring dynamic menus, keyboard navigation, and a custom modal for cookie information.
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Mizu Fractal Engine - Estándar de Navegación Fractal para la Web e IA. Interfaz accesible, segura y fluida con transiciones cinéticas optimizadas.">
-    <meta name="keywords" content="fractal, navegación, accesibilidad, web, IA, Mizu Legends Studios, Moises Núñez">
-    <meta name="author" content="Moises Núñez">
-    <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#a8dadc">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="Mizu Fractal Engine">
-    <meta property="og:description" content="Interfaz de navegación fractal accesible y fluida para la web y IA">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://mizu-fractal-engine.com">
-    <meta property="og:image" content="https://mizu-fractal-engine.com/preview.png">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@mizulegends">
-    <meta name="twitter:creator" content="@mizulegends">
-    
-    <title>Mizu Fractal Engine - Manual Interactivo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mizu Esports · Navegación Fractal</title>
     <style>
-        /**
-         * =============================================================================
-         * MIZU FRACTAL ENGINE - Estándar de Navegación Fractal 
-         * Copyright (C) 2026 Moises Núñez / Mizu Legends Studios - Licencia AGPLv3
-         * =============================================================================
-         */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         :root {
-            /* Tema 1: Illustrator Pastel (Default) */
-            --hex-gold: #d4b483; --hex-blue: #a8dadc; --bg-dark: #2b2d42;
-            --bg-card: #edf2f4; --text-main: #2b2d42; --glass: rgba(255, 255, 255, 0.7);
-            --transition: 0.8s cubic-bezier(0.2, 1, 0.2, 1);
-            --focus-ring: 2px solid var(--hex-gold);
+            --hex-gold: #c8aa6e;
+            --hex-blue: #0ac8b9;
+            --bg-dark: #010a13;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(200, 170, 110, 0.25);
+            --transition: 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         }
 
-        /* Definición de Temas Cíclicos */
-        body.theme-2 { --hex-gold: #c8aa6e; --bg-dark: #010a13; --bg-card: #091428; --text-main: #f0e6d2; --glass: rgba(1, 10, 19, 0.8); } /* LoL Dark */
-        body.theme-3 { --hex-gold: #ff758c; --bg-dark: #2b0b3d; --bg-card: #f9f7f7; --text-main: #2b0b3d; --glass: rgba(255, 255, 255, 0.8); } /* Cyber Pastel */
-        body.theme-4 { --hex-gold: #4a4e69; --bg-dark: #22223b; --bg-card: #9a8c98; --text-main: #22223b; --glass: rgba(255, 255, 255, 0.5); } /* Industrial */
-        body.theme-5 { --hex-gold: #2d6a4f; --bg-dark: #081c15; --bg-card: #d8f3dc; --text-main: #081c15; --glass: rgba(216, 243, 220, 0.8); } /* Forest Nature */
-
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        body { background: var(--bg-dark); color: var(--text-main); font-family: "Inter", sans-serif; overflow: hidden; perspective: 2000px; height: 100vh; transition: background 0.5s ease; }
-
-        .hud-nav { position: fixed; top: 0; width: 100%; padding: 20px; z-index: 1000; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
-        .hud-nav::-webkit-scrollbar { display: none; }
-
-        .crumb { 
-            white-space: nowrap; font-size: 11px; letter-spacing: 2px; color: var(--hex-gold); 
-            padding: 8px 15px; background: var(--glass); border: 1px solid var(--hex-gold);
-            backdrop-filter: blur(10px); cursor: pointer; text-transform: uppercase; border-radius: 4px; 
-            transition: 0.3s; display: flex; align-items: center;
+        body {
+            background: var(--bg-dark);
+            color: #f0f3f8;
+            font-family: system-ui, 'Inter', -apple-system, 'Segoe UI', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            perspective: 1200px;
         }
 
-        #stage { width: 100vw; height: 100vh; display: flex; transform-style: preserve-3d; }
-
-        /* Responsividad */
-        @media (orientation: portrait) { 
-            #stage { flex-direction: column; } 
-            .node { flex: 1; height: 33.33vh; } 
-            .node-detail { display: none; } 
-        }
-        @media (orientation: landscape) {
-            #stage { flex-direction: column; overflow-y: auto; scroll-snap-type: y mandatory; }
-            .node { flex: 0 0 100vh; scroll-snap-align: start; padding: 100px; }
-            .node-detail { display: block; margin-top: 30px; opacity: 0.8; font-size: 1.2rem; max-width: 800px; }
-        }
-
-        .node { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            position: relative; background: var(--bg-card); border-bottom: 2px solid rgba(0,0,0,0.05);
-            transition: transform var(--transition), opacity var(--transition), filter var(--transition), background 0.3s;
-            cursor: pointer; text-align: center;
-            scroll-snap-align: start;
-        }
-
-        .node:focus { 
-            background: #fff; 
-            border: 2px solid var(--hex-gold); 
-            box-shadow: 0 0 40px rgba(0,0,0,0.1); 
-            z-index: 10; 
-            outline: none;
-        }
-
-        .node h2 { 
-            font-size: 3.5rem; 
-            text-transform: uppercase; 
-            letter-spacing: 8px; 
-            color: inherit; 
-            margin-bottom: 20px;
-        }
-
-        /* Animaciones Cinéticas Unificadas */
-        .anim-slide-in {
-            animation: slideIn var(--transition) forwards;
-        }
-        
-        .anim-slide-out {
-            animation: slideOut var(--transition) forwards;
-        }
-
-        @keyframes slideIn {
-            0% { 
-                transform: translateZ(-800px) scale(0.9); 
-                opacity: 0; 
-                filter: blur(20px);
-            }
-            100% { 
-                transform: translateZ(0) scale(1); 
-                opacity: 1; 
-                filter: blur(0);
-            }
-        }
-
-        @keyframes slideOut {
-            0% { 
-                transform: translateZ(0) scale(1); 
-                opacity: 1; 
-                filter: blur(0);
-            }
-            100% { 
-                transform: translateZ(1500px) scale(0.9); 
-                opacity: 0; 
-                filter: blur(20px);
-            }
-        }
-
-        /* Modal de Cookies */
-        .cookie-modal {
+        /* --- SMART BREADCRUMBS (horizontal) --- */
+        .hud-nav {
             position: fixed;
-            bottom: 0;
+            top: 0;
             left: 0;
-            right: 0;
-            background: var(--bg-card);
-            padding: 20px;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            z-index: 2000;
-        }
-
-        .cookie-modal.show {
-            transform: translateY(0);
-        }
-
-        .cookie-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .cookie-text {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .cookie-buttons {
+            width: 100%;
+            padding: 16px 20px;
+            background: linear-gradient(to bottom, rgba(1, 10, 19, 0.96), rgba(1, 10, 19, 0.4));
+            backdrop-filter: blur(12px);
+            z-index: 1100;
             display: flex;
             gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .cookie-btn {
-            padding: 8px 16px;
-            border: 1px solid var(--hex-gold);
-            background: var(--glass);
-            color: var(--text-main);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .cookie-btn:hover {
-            background: var(--hex-gold);
-            color: white;
-        }
-
-        /* Accesibilidad */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
+            overflow-x: auto;
             white-space: nowrap;
-            border-width: 0;
+            scrollbar-width: thin;
+            border-bottom: 1px solid rgba(200, 170, 110, 0.2);
+            mask-image: linear-gradient(to right, black 94%, transparent 100%);
+        }
+        .hud-nav::-webkit-scrollbar {
+            height: 3px;
+            background: transparent;
+        }
+        .hud-nav::-webkit-scrollbar-thumb {
+            background: var(--hex-gold);
+            border-radius: 10px;
+        }
+        .crumb {
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--glass-border);
+            padding: 6px 14px;
+            border-radius: 40px;
+            color: var(--hex-gold);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: monospace;
+        }
+        .crumb:hover {
+            background: var(--hex-blue);
+            color: #010a13;
+            border-color: var(--hex-blue);
+            transform: translateY(-2px);
         }
 
-        /* Seguridad - Prevenir selecciones no deseadas */
-        .node, .crumb {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+        /* --- MAIN SCROLL STAGE --- */
+        #stage {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* --- NODOS (cards) --- */
+        .node {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: radial-gradient(ellipse at 50% 30%, rgba(10, 200, 185, 0.08), rgba(1, 10, 19, 0.7));
+            border-bottom: 1px solid rgba(200, 170, 110, 0.2);
+            transition: transform 0.2s, background 0.2s;
+            cursor: pointer;
+            outline: none;
+            position: relative;
+            padding: 1.5rem;
+        }
+        .node:focus-visible {
+            outline: 3px solid var(--hex-blue);
+            background: rgba(10, 200, 185, 0.12);
+            box-shadow: inset 0 0 30px rgba(10, 200, 185, 0.2);
+        }
+        .node:hover {
+            background: radial-gradient(ellipse at 50% 30%, rgba(200, 170, 110, 0.12), rgba(1, 10, 19, 0.8));
+        }
+
+        /* landscape: cada nodo ocupa toda la pantalla con snap */
+        @media (orientation: landscape) {
+            #stage {
+                scroll-snap-type: y mandatory;
+            }
+            .node {
+                min-height: 100vh;
+                scroll-snap-align: start;
+                padding: 2rem 4rem;
+            }
+        }
+
+        /* portrait: tamaño dinámico sin snap, mejor scroll */
+        @media (orientation: portrait) {
+            .node {
+                min-height: 33.33vh;
+                padding: 1.2rem;
+            }
+            .node h2 {
+                font-size: 1.8rem !important;
+                letter-spacing: 2px;
+                word-break: break-word;
+                max-width: 90vw;
+            }
+            .node-tag {
+                font-size: 0.65rem;
+            }
+            .node-detail {
+                display: none;  /* limpia en vertical */
+            }
+        }
+
+        .node-tag {
+            font-size: 0.7rem;
+            color: var(--hex-blue);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            padding: 4px 12px;
+            border-radius: 60px;
+            display: inline-block;
+        }
+
+        .node h2 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            background: linear-gradient(135deg, #fff, var(--hex-gold));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            margin: 20px 0;
+            max-width: 90vw;
+            word-break: break-word;
+        }
+
+        .node-detail {
+            max-width: 560px;
+            font-size: 0.95rem;
+            color: #b9c7d9;
+            line-height: 1.5;
+            margin-top: 20px;
+            backdrop-filter: blur(4px);
+            padding: 12px 18px;
+            border-radius: 32px;
+            background: rgba(0,0,0,0.3);
+            border: 0.5px solid rgba(200,170,110,0.3);
+        }
+
+        /* animaciones */
+        .zoom-forward {
+            transform: scale(0.9) translateZ(-400px);
+            opacity: 0;
+            filter: blur(12px);
+            transition: transform 0.35s ease-out, opacity 0.3s, filter 0.3s;
+        }
+        .spawn-in {
+            animation: spawnGlow 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards;
+        }
+        @keyframes spawnGlow {
+            0% {
+                opacity: 0;
+                transform: scale(0.92) translateY(18px);
+                filter: blur(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        /* === COOKIE MODAL (CSS puro, sin alert) === */
+        .cookie-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(1, 10, 19, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--hex-gold);
+            border-radius: 28px;
+            padding: 14px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            z-index: 2000;
+            font-size: 0.85rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            transition: all 0.2s;
+        }
+        .cookie-bar p {
+            flex: 2;
+            color: #ddd;
+            font-weight: 400;
+        }
+        .cookie-bar button {
+            background: transparent;
+            border: 1px solid var(--hex-blue);
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: var(--hex-blue);
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.75rem;
+        }
+        .cookie-bar button:hover {
+            background: var(--hex-blue);
+            color: #010a13;
+            border-color: var(--hex-blue);
+        }
+        .btn-more {
+            background: rgba(200,170,110,0.2);
+            border-color: var(--hex-gold);
+            color: var(--hex-gold);
+        }
+        /* modal flotante */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
+        }
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-card {
+            background: #0a1424;
+            border: 1px solid var(--hex-gold);
+            border-radius: 32px;
+            max-width: 480px;
+            width: 85%;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.5);
+        }
+        .modal-card h3 {
+            color: var(--hex-gold);
+            margin-bottom: 16px;
+            font-size: 1.7rem;
+        }
+        .modal-card p {
+            color: #ccd6f0;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        .modal-close {
+            background: var(--hex-blue);
+            border: none;
+            color: #010a13;
+            padding: 8px 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        @media (max-width: 560px) {
+            .cookie-bar { flex-direction: column; text-align: center; padding: 14px; }
+            .node h2 { font-size: 1.6rem !important; letter-spacing: 2px; }
         }
     </style>
 </head>
 <body>
 
-<!-- Modal de Cookies -->
-<div class="cookie-modal" id="cookieModal" role="dialog" aria-labelledby="cookieTitle" aria-describedby="cookieDescription">
-    <div class="cookie-content">
-        <div class="cookie-text">
-            <h3 id="cookieTitle">Política de Cookies</h3>
-            <p id="cookieDescription">Usamos cookies para mejorar tu experiencia. Al navegar, aceptas nuestro uso de cookies. <a href="#" onclick="showPrivacyPolicy(); return false;">Más información</a></p>
-        </div>
-        <div class="cookie-buttons">
-            <button class="cookie-btn" onclick="acceptCookies();">Aceptar</button>
-            <button class="cookie-btn" onclick="rejectCookies();">Rechazar</button>
-        </div>
+<nav class="hud-nav" id="hud-nav"></nav>
+<div id="stage"></div>
+
+<!-- COOKIE MODAL (sin alert) y aviso -->
+<div id="cookieBar" class="cookie-bar" style="display: none;">
+    <p>🍪 Usamos cookies para mejorar tu experiencia. No almacenamos datos personales.</p>
+    <div style="display: flex; gap: 12px;">
+        <button id="moreInfoBtn" class="btn-more">📄 Más información</button>
+        <button id="acceptCookiesBtn">Aceptar</button>
     </div>
 </div>
 
-<nav class="hud-nav" id="hud-nav" role="navigation" aria-label="Navegación principal"></nav>
-<div id="stage" role="main"></div>
+<div id="infoModal" class="modal-overlay">
+    <div class="modal-card" role="dialog" aria-modal="true">
+        <h3>✨ Política de cookies</h3>
+        <p>Este sitio web utiliza cookies técnicas y funcionales para garantizar la navegación fluida y la persistencia de preferencias. No se recopilan datos con fines publicitarios. <br><br> Al aceptar, se almacena tu preferencia. Puedes borrar los datos desde la configuración de tu navegador.</p>
+        <button class="modal-close" id="closeModalBtn">Entendido</button>
+    </div>
+</div>
 
 <script>
+    // ---------- AUDIO LIGERO (feedback) ----------
     const AudioEngine = {
         ctx: null,
-        initialized: false,
-        audioContextReady: false,
-        
         init() {
-            if (typeof window.AudioContext !== 'undefined' || typeof window.webkitAudioContext !== 'undefined') {
+            if (!this.ctx) {
                 this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                this.initialized = true;
             }
         },
-        
-        ensureAudioContext() {
-            if (this.initialized && this.ctx && this.ctx.state === 'suspended') {
-                const startAudio = () => {
-                    this.ctx.resume();
-                    this.audioContextReady = true;
-                    document.removeEventListener('click', startAudio);
-                    document.removeEventListener('keydown', startAudio);
-                };
-                
-                document.addEventListener('click', startAudio, { once: true });
-                document.addEventListener('keydown', startAudio, { once: true });
+        tic(freq = 780) {
+            if (!this.ctx) this.init();
+            if (this.ctx.state === 'suspended') {
+                this.ctx.resume().catch(()=>{});
             }
-        },
-        
-        tic(freq = 800) {
-            if (!this.audioContextReady) {
-                this.ensureAudioContext();
-                return;
-            }
-            
-            if (!this.initialized || !this.ctx) return;
-            
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-            gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.05);
-            osc.connect(gain); gain.connect(this.ctx.destination);
-            osc.start(); osc.stop(this.ctx.currentTime + 0.05);
+            try {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                gain.gain.value = 0.05;
+                gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.06);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.07);
+            } catch(e) { /* silent */ }
         }
     };
 
-    // Datos de ejemplo con una rama profunda y muchos elementos
-    let fractalData = {
-        "HOME": {
-            "items": ["Explorar", "Tutorial", "Demostración", "Profunda"],
-            "desc": "Bienvenido al Motor Fractal Mizu. Explora las opciones disponibles."
+    // ---------- BASE DE DATOS (rama principal + dispersión depth) ----------
+    const db = {
+        'HOME': {
+            items: ['News', 'Wiki', 'Pro Teams', 'Depth Labyrinth'],
+            desc: 'Portal central de Mizu Esports. Explora noticias, equipos o sumérgete en el laberinto de profundidad.'
         },
-        "EXPLORAR": {
-            "items": ["Navegación", "Animaciones", "Temas", "Accesibilidad"],
-            "desc": "Explora las características principales del motor fractal."
+        'NEWS': {
+            items: ['Patch 14.8', 'Mizu Cup 2026', 'New Skins'],
+            desc: 'Últimas crónicas del servidor, campeonatos y parches.'
         },
-        "TUTORIAL": {
-            "items": ["Introducción", "Conceptos", "Ejemplos", "Prácticas"],
-            "desc": "Aprende a usar el motor fractal paso a paso."
+        'WIKI': {
+            items: ['Game Mechanics', 'Lore', 'Items Database'],
+            desc: 'Enciclopedia colaborativa del universo Mizu.'
         },
-        "DEMONSTRACIÓN": {
-            "items": ["Básico", "Intermedio", "Avanzado", "Profundo"],
-            "desc": "Visualiza las capacidades del motor en acción."
+        'PRO TEAMS': {
+            items: ['Mizu Legends', 'T1', 'Gen.G'],
+            desc: 'Los equipos élite a nivel global.'
         },
-        "PROFUNDA": {
-            "items": [
-                "Elemento 1", "Elemento 2", "Elemento 3", "Elemento 4", "Elemento 5",
-                "Elemento 6", "Elemento 7", "Elemento 8", "Elemento 9", "Elemento 10",
-                "Elemento 11", "Elemento 12", "Elemento 13", "Elemento 14", "Elemento 15",
-                "Elemento 16", "Elemento 17", "Elemento 18", "Elemento 19", "Elemento 20",
-                "Elemento 21", "Elemento 22", "Elemento 23", "Elemento 24", "Elemento 25"
-            ],
-            "desc": "Esta rama muestra cómo el menú se adapta cuando hay demasiados elementos para mostrar en el viewport. Desliza para ver todos los elementos disponibles."
+        'MIZU LEGENDS': {
+            items: ['History', 'Players', 'Stats'],
+            desc: 'Legado y trayectoria del equipo insignia.'
         },
-        "NAVEGACIÓN": {
-            "items": ["Scroll", "Teclas", "Mouse", "Touch"],
-            "desc": "Métodos de navegación disponibles en el motor fractal."
+        'PLAYERS': {
+            items: ['Ryu', 'Baido', 'Mizu', 'Dragon', 'General'],
+            desc: 'Roster oficial camino a la gloria internacional.'
         },
-        "ANIMACIONES": {
-            "items": ["Entrada", "Salida", "Transiciones", "Efectos"],
-            "desc": "Animaciones cinéticas y efectos visuales."
+        'DEPTH LABYRINTH': {
+            items: ['DepthLevel_0'],
+            desc: '🧬 Rama de dispersión — prueba de profundidad extrema para visualizar breadcrumbs.'
         },
-        "TEMAS": {
-            "items": ["Pastel", "Oscuro", "Ciber", "Industrial", "Naturaleza"],
-            "desc": "Temas visuales disponibles para personalización."
-        },
-        "ACCESIBILIDAD": {
-            "items": ["Teclado", "Lectores de pantalla", "Contraste", "Tamaño"],
-            "desc": "Características de accesibilidad integradas."
-        }
+        'T1': { items: ['T1 Roster', 'T1 Achievements'], desc: 'T1: tres veces campeón mundial.' },
+        'GEN.G': { items: ['Gen.G Academy', 'Main Squad'], desc: 'Poder coreano en ascenso.' },
+        // algunos nodos terminales / decorativos
+        'Game Mechanics': { items: [], desc: 'Sistemas de juego y diseño táctico.' },
+        'Lore': { items: [], desc: 'Historia detrás del universo Mizu.' },
+        'History': { items: [], desc: 'Orígenes, trofeos y momentos icónicos.' },
+        'Stats': { items: [], desc: 'KDA, map control y estadísticas avanzadas.' },
+        'T1 Roster': { items: [], desc: 'Faker, Zeus, Gumayusi, Keria, Oner.' },
+        'T1 Achievements': { items: [], desc: 'Múltiples títulos LCK y Worlds.' }
     };
 
-    let historyStack = ['HOME'];
-    let currentTheme = 1;
-    let cookiesAccepted = false;
-    let isAnimating = false;
-
-    // Inicialización
-    document.addEventListener('DOMContentLoaded', () => {
-        document.addEventListener('click', () => {
-            AudioEngine.init();
-            AudioEngine.ensureAudioContext();
-        }, { once: true });
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                AudioEngine.init();
-                AudioEngine.ensureAudioContext();
-            }
-        }, { once: true });
-        
-        checkCookieConsent();
-        loadData();
-    });
-
-    function loadData() {
-        // Usamos los datos locales en lugar de fetch
-        loadFromURL();
+    // Handler para nodos dinámicos de profundidad (niveles infinitos)
+    function getDynamicDepthData(nodeName) {
+        // patron DepthLevel_<numero>
+        const match = nodeName.match(/^DepthLevel_(\d+)$/i);
+        if (match) {
+            const currentLevel = parseInt(match[1], 10);
+            const nextLevelNum = currentLevel + 1;
+            const nextNode = `DepthLevel_${nextLevelNum}`;
+            return {
+                items: [nextNode],
+                desc: `🌀 Nivel de dispersión ${currentLevel} · haz clic para profundizar aún más. Breadcrumbs se ajustará automáticamente.`
+            };
+        }
+        return null;
     }
 
-    function toggleTheme() {
-        currentTheme = currentTheme >= 5 ? 1 : currentTheme + 1;
-        document.body.className = currentTheme === 1 ? '' : `theme-${currentTheme}`;
-        AudioEngine.tic(1500);
+    let historyStack = ['HOME'];   // ruta actual
+
+    // --- ACTUALIZAR URL HASH ---
+    function updateURL() {
+        const path = historyStack.join('/');
+        window.location.hash = path;
     }
 
-    function navigate(direction) {
-        if (isAnimating) return;
-        isAnimating = true;
-        
-        const stage = document.getElementById('stage');
+    // --- RENDER PRINCIPAL (con manejo de profundidad dinámica y enfoque)---
+    function render(currentNode, direction = 'forward') {
+        const stageEl = document.getElementById('stage');
         const oldNodes = document.querySelectorAll('.node');
-        
-        // Limpiar animaciones previas
-        oldNodes.forEach(n => {
-            n.classList.remove('anim-slide-in', 'anim-slide-out');
-        });
+        oldNodes.forEach(node => node.classList.add('zoom-forward'));
 
         setTimeout(() => {
-            stage.innerHTML = '';
-            const key = historyStack[historyStack.length - 1].toUpperCase();
-            const data = fractalData[key] || { items: [], desc: "Contenido terminal del manual." };
-            const isTerminal = historyStack.length > 4 || data.items.length === 0;
+            stageEl.innerHTML = '';
+            const upperNode = currentNode.toUpperCase();
+            let data = null;
 
-            if (isTerminal) {
-                const div = createNode(historyStack[historyStack.length - 1], "PUNTO FINAL", data.desc, true);
-                stage.appendChild(div);
-            } else {
-                data.items.forEach((name, i) => {
-                    stage.appendChild(createNode(name, key, fractalData[name.toUpperCase()]?.desc || "Explora este módulo...", false));
+            // 1. verificar si es nodo dinámico de profundidad
+            const dynamic = getDynamicDepthData(currentNode);
+            if (dynamic) {
+                data = dynamic;
+            } 
+            // 2. nodo estático en db
+            else if (db[upperNode]) {
+                data = { items: db[upperNode].items, desc: db[upperNode].desc };
+            } 
+            // 3. fallback: nodo terminal sin hijos ramificados
+            else {
+                data = { items: [], desc: `📌 ${currentNode} — Información detallada del perfil. Rama terminal.` };
+            }
+
+            // Control de dispersión: si tiene items, se muestran, sino se muestra como hoja.
+            const hasItems = data.items && data.items.length > 0;
+            
+            if (!hasItems) {
+                // nodo terminal hoja
+                const leafDiv = document.createElement('div');
+                leafDiv.className = 'node spawn-in';
+                leafDiv.tabIndex = 0;
+                leafDiv.innerHTML = `
+                    <div class="node-tag">⚡ NODO FINAL</div>
+                    <h2>${currentNode}</h2>
+                    <div class="node-detail">${data.desc || 'Este es el final del camino. Usa las migas o retrocede con ESC/Backspace.'}</div>
+                `;
+                leafDiv.onclick = () => {};  // sin navegación adicional
+                leafDiv.onkeydown = (e) => { if(e.key === 'Enter') {} };
+                stageEl.appendChild(leafDiv);
+            } 
+            else {
+                // generar cada item como nodo navegable
+                data.items.forEach((itemName) => {
+                    const div = document.createElement('div');
+                    div.className = 'node spawn-in';
+                    div.tabIndex = 0;
+                    // texto elegante
+                    const itemDisplay = itemName;
+                    div.innerHTML = `
+                        <div class="node-tag">${currentNode}</div>
+                        <h2>${itemDisplay}</h2>
+                        <div class="node-detail">${getDescriptionForItem(itemName, currentNode)}</div>
+                    `;
+                    
+                    div.onclick = (e) => {
+                        e.stopPropagation();
+                        AudioEngine.tic(1250);
+                        historyStack.push(itemName);
+                        updateURL();
+                        render(itemName, 'forward');
+                    };
+                    
+                    div.onkeydown = (e) => {
+                        if (e.key === 'Enter') div.click();
+                        // navegación vertical entre nodos (up/down)
+                        if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            const next = div.nextElementSibling;
+                            if (next) next.focus();
+                        }
+                        if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            const prev = div.previousElementSibling;
+                            if (prev) prev.focus();
+                        }
+                    };
+                    stageEl.appendChild(div);
                 });
             }
+            
+            // actualizar breadcrumbs después de generar
             updateHUD();
+            // enfocar al primer nodo disponible
+            const firstNode = stageEl.querySelector('.node');
+            if (firstNode) firstNode.focus();
             
-            // Asegurar foco en el primer elemento
-            const firstNode = stage.querySelector('.node');
-            if (firstNode) {
-                firstNode.focus();
-                firstNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // pequeño scroll opcional para mantener la parte superior en portrait
+            if (window.innerWidth <= 768) {
+                stageEl.scrollTop = 0;
             }
-        }, 100);
-
-        // Aplicar animaciones
-        setTimeout(() => {
-            oldNodes.forEach(n => {
-                n.classList.add(direction === 'forward' ? 'anim-slide-out' : 'anim-slide-in');
-            });
-            
-            // Reiniciar estado de animación después de la transición
-            setTimeout(() => {
-                isAnimating = false;
-            }, 800);
-        }, 50);
+        }, 280);
     }
 
-    function createNode(name, tag, desc, terminal) {
-        const div = document.createElement('div');
-        div.className = 'node';
-        div.tabIndex = 0;
-        div.setAttribute('role', 'button');
-        div.setAttribute('aria-label', `${name} - ${desc}`);
-        div.innerHTML = `<div class="node-tag">${tag}</div><h2>${name}</h2><div class="node-detail">${desc}</div>`;
-        
-        const executeNav = () => {
-            if(terminal) return;
-            AudioEngine.tic(1200);
-            historyStack.push(name);
-            window.location.hash = historyStack.join('/');
-            navigate('forward');
-        };
-
-        div.onclick = executeNav;
-        div.onkeydown = (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                executeNav();
-            }
-            if (e.key === 'ArrowDown') { 
-                e.preventDefault(); 
-                const next = div.nextElementSibling;
-                if (next && next.classList && next.classList.contains('node')) {
-                    next.focus();
-                    next.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    setTimeout(() => navigate('forward'), 100);
-                }
-            }
-            if (e.key === 'ArrowUp') { 
-                e.preventDefault(); 
-                const prev = div.previousElementSibling;
-                if (prev && prev.classList && prev.classList.contains('node')) {
-                    prev.focus();
-                    prev.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    setTimeout(() => navigate('backward'), 100);
-                }
-            }
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const focusable = Array.from(document.querySelectorAll('.node'));
-                const currentIndex = focusable.indexOf(div);
-                const nextIndex = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
-                if (nextIndex >= 0 && nextIndex < focusable.length) {
-                    focusable[nextIndex].focus();
-                    focusable[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    setTimeout(() => navigate(e.shiftKey ? 'backward' : 'forward'), 100);
-                }
-            }
-        };
-        return div;
+    // Helper para descripciones atractivas (evita texto vacío)
+    function getDescriptionForItem(item, parentNode) {
+        const upperItem = item.toUpperCase();
+        if (db[upperItem] && db[upperItem].desc) return db[upperItem].desc;
+        if (item.startsWith('DepthLevel_')) {
+            const lvl = item.split('_')[1];
+            return `🔻 Accede a la profundidad ${lvl}. El breadcrumb se expandirá para probar la navegación.`;
+        }
+        return `Explora más dentro de ${item} · rama interactiva.`;
     }
 
+    // --- ACTUALIZAR BARRA DE MIGAS DE PAN (breadcrumbs) ---
     function updateHUD() {
         const nav = document.getElementById('hud-nav');
         nav.innerHTML = '';
-        
-        historyStack.forEach((name, i) => {
-            const span = document.createElement('span');
-            span.className = 'crumb';
-            span.innerText = name;
-            span.setAttribute('role', 'button');
-            span.setAttribute('aria-label', `Navegar a ${name}`);
-            span.onclick = () => {
-                if (i === historyStack.length - 1) return;
-                AudioEngine.tic(700);
-                historyStack = historyStack.slice(0, i + 1);
-                window.location.hash = historyStack.join('/');
-                navigate('backward');
+        historyStack.forEach((crumbName, idx) => {
+            const crumbSpan = document.createElement('span');
+            crumbSpan.className = 'crumb';
+            // truncar visualmente si es demasiado largo
+            let displayName = crumbName.length > 24 ? crumbName.slice(0, 20) + '…' : crumbName;
+            crumbSpan.innerText = displayName;
+            crumbSpan.title = crumbName;
+            crumbSpan.onclick = (e) => {
+                e.stopPropagation();
+                if (idx === historyStack.length - 1) return;
+                AudioEngine.tic(650);
+                historyStack = historyStack.slice(0, idx + 1);
+                updateURL();
+                render(historyStack[historyStack.length - 1], 'backward');
             };
-            nav.appendChild(span);
+            nav.appendChild(crumbSpan);
         });
-
-        // Botón Temas
-        const themeBtn = document.createElement('span');
-        themeBtn.className = 'crumb';
-        themeBtn.style.marginLeft = 'auto';
-        themeBtn.style.borderColor = 'var(--hex-blue)';
-        themeBtn.setAttribute('role', 'button');
-        themeBtn.setAttribute('aria-label', 'Cambiar tema');
-        themeBtn.innerHTML = `🎨 TEMA ${currentTheme}`;
-        themeBtn.onclick = toggleTheme;
-        nav.appendChild(themeBtn);
-
-        // Botón Donación
-        const donateBtn = document.createElement('a');
-        donateBtn.className = 'crumb';
-        donateBtn.href = "https://www.paypal.com/donate/?hosted_button_id=CE4XEUSEYHQXL";
-        donateBtn.target = "_blank";
-        donateBtn.rel = "noopener noreferrer";
-        donateBtn.style.color = "#ff5f5f";
-        donateBtn.setAttribute('role', 'link');
-        donateBtn.setAttribute('aria-label', 'Apoyar el proyecto en PayPal');
-        donateBtn.innerText = "☕ APOYAR";
-        nav.appendChild(donateBtn);
+        // desplazar automaticamente al ultimo crumb
+        if (nav.lastChild) nav.lastChild.scrollIntoView({ behavior: 'smooth', inline: 'end', block: 'nearest' });
     }
 
-    // Manejo unificado de scroll con animación
-    let scrollTimeout;
-    document.getElementById('stage').addEventListener('scroll', () => {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            const stage = document.getElementById('stage');
-            const scrollPosition = stage.scrollTop;
-            const nodeHeight = window.innerHeight;
-            const currentIndex = Math.round(scrollPosition / nodeHeight);
-            
-            // Encontrar el nodo actual y aplicar animación
-            const nodes = document.querySelectorAll('.node');
-            if (nodes[currentIndex]) {
-                nodes[currentIndex].focus();
-                
-                // Determinar dirección del scroll para animación
-                const previousIndex = historyStack.length - 2;
-                if (currentIndex > previousIndex) {
-                    navigate('forward');
-                } else {
-                    navigate('backward');
-                }
-            }
-        }, 100);
-    });
-
-    window.addEventListener('keydown', (e) => {
+    // --- MANEJO GLOBAL: ESC / BACKSPACE para retroceder, flechas de scroll suave ---
+    function globalKeyHandler(e) {
+        // escape o backspace (sin interferir inputs)
         if (e.key === 'Escape' || e.key === 'Backspace') {
             if (historyStack.length > 1) {
-                AudioEngine.tic(600);
+                e.preventDefault();
+                AudioEngine.tic(550);
                 historyStack.pop();
-                window.location.hash = historyStack.join('/');
-                navigate('backward');
+                updateURL();
+                render(historyStack[historyStack.length - 1], 'backward');
             }
         }
-    });
+        // flechas laterales opcionales para cambiar nodos? no necesario pero no interfiere.
+    }
 
+    // ---- COOKIE MODAL LOGICA SIN ALERT ----
+    function initCookieConsent() {
+        const cookieBar = document.getElementById('cookieBar');
+        const modalOverlay = document.getElementById('infoModal');
+        const acceptBtn = document.getElementById('acceptCookiesBtn');
+        const moreBtn = document.getElementById('moreInfoBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        const hasConsented = localStorage.getItem('mizu_cookie_consent');
+        if (!hasConsented) {
+            cookieBar.style.display = 'flex';
+        } else {
+            cookieBar.style.display = 'none';
+        }
+
+        acceptBtn.addEventListener('click', () => {
+            localStorage.setItem('mizu_cookie_consent', 'true');
+            cookieBar.style.display = 'none';
+            AudioEngine.tic(400);
+        });
+
+        // modal sin alert
+        moreBtn.addEventListener('click', () => {
+            modalOverlay.classList.add('active');
+            AudioEngine.tic(680);
+        });
+
+        const closeModal = () => {
+            modalOverlay.classList.remove('active');
+        };
+        closeModalBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                closeModal();
+            }
+        });
+    }
+
+    // ------- MANEJAR HASH Y CARGA INICIAL (PROFUNDIDAD URL) -------
     function loadFromURL() {
-        const hash = window.location.hash.replace('#/', '').replace('#', '');
+        let hash = window.location.hash.replace('#/', '').replace('#', '');
         if (hash) {
-            historyStack = hash.split('/').map(s => decodeURIComponent(s));
-            navigate('forward');
-        } else { 
-            navigate('forward'); 
-        }
-    }
-
-    // Funciones de Cookies con fallback
-    function checkCookieConsent() {
-        try {
-            const consent = localStorage.getItem('cookieConsent');
-            if (!consent) {
-                showCookieModal();
-            } else {
-                cookiesAccepted = consent === 'accepted';
+            const parts = hash.split('/').filter(p => p.trim() !== '');
+            if (parts.length > 0) {
+                historyStack = parts;
+                render(historyStack[historyStack.length - 1], 'forward');
+                return;
             }
-        } catch (e) {
-            console.warn('localStorage no disponible, usando fallback');
-            cookiesAccepted = true;
         }
+        // si no hash o vacío, comienza HOME
+        historyStack = ['HOME'];
+        render('HOME', 'forward');
     }
 
-    function showCookieModal() {
-        const modal = document.getElementById('cookieModal');
-        modal.classList.add('show');
-    }
-
-    function acceptCookies() {
-        try {
-            localStorage.setItem('cookieConsent', 'accepted');
-            cookiesAccepted = true;
-            hideCookieModal();
-        } catch (e) {
-            console.warn('No se pudo guardar preferencia de cookies:', e);
-            cookiesAccepted = true;
-            hideCookieModal();
+    // Cierre suave de audio y activación primer toque
+    function onFirstInteraction() {
+        if (AudioEngine.ctx && AudioEngine.ctx.state === 'suspended') {
+            AudioEngine.ctx.resume();
         }
+        document.removeEventListener('click', onFirstInteraction);
+        document.removeEventListener('keydown', onFirstInteraction);
+        document.removeEventListener('touchstart', onFirstInteraction);
     }
-
-    function rejectCookies() {
-        try {
-            localStorage.setItem('cookieConsent', 'rejected');
-            cookiesAccepted = false;
-            hideCookieModal();
-        } catch (e) {
-            console.warn('No se pudo guardar preferencia de cookies:', e);
-            cookiesAccepted = false;
-            hideCookieModal();
-        }
-    }
-
-    function hideCookieModal() {
-        const modal = document.getElementById('cookieModal');
-        modal.classList.remove('show');
-    }
-
-    function showPrivacyPolicy() {
-        alert('Política de privacidad: Este sitio utiliza cookies para mejorar la experiencia del usuario. Los datos se procesan de acuerdo con las regulaciones de protección de datos.');
+    document.addEventListener('click', onFirstInteraction);
+    document.addEventListener('keydown', onFirstInteraction);
+    document.addEventListener('touchstart', onFirstInteraction);
+    
+    // --- EVENTOS GLOBALES ---
+    window.addEventListener('keydown', globalKeyHandler);
+    window.addEventListener('hashchange', loadFromURL);
+    
+    // Inicialización completa
+    window.onload = () => {
+        loadFromURL();
+        initCookieConsent();
+        // pre activar audio context silencioso
+        AudioEngine.init();
+        // Ajuste extra para texto en portrait: forzar reflow
+        const style = document.createElement('style');
+        style.textContent = `@media (max-width: 550px) { .node h2 { font-size: 1.4rem !important; line-height: 1.2; } }`;
+        document.head.appendChild(style);
+    };
+    
+    // para depurar no errores de navegación, aseguramos que al hacer click en cualquier nodo se limpie comportamiento
+    // adicional: evitar scroll forzado en landscape
+    if ('scrollBehavior' in document.documentElement.style) {
+        // moderno
     }
 </script>
 </body>
